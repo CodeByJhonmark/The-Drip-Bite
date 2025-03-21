@@ -1,0 +1,135 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f0f0f0;
+}
+.container {
+    position: relative;
+    width: 800px;
+    background: white;
+    border-radius: 40px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+.form-container {
+    width: 50%;
+    padding: 40px;
+    text-align: center;
+}
+.logo{
+    display: flex;
+    width: 180px;
+    position: absolute;
+    right: 115px;
+    top: 10px;
+    z-index: 1000;
+}
+h1 {
+    color: #ff0000;
+    margin-bottom: 20px;
+}
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+a {
+    display: block;
+    margin-bottom: 15px;
+    color: #4a90e2;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+button {
+    width: 100%;
+    display: block; 
+    padding: 10px;
+    background: #ff0000;
+    border: 2px solid white;
+    color: white;
+    width: 150px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s, border-color 0.3s;
+}
+button:hover {
+    background: orange;
+    border: 2px solid white;
+}
+#l1{
+    width: 100%;
+    display: block; 
+    padding: 10px;
+    background: #ff0000;
+    border: 2px solid white;
+    color: white;
+    width: 150px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-left: 80px;
+    margin-bottom: 10px;
+    transition: background 0.3s, border-color 0.3s;
+}
+#l1:hover{
+    background: orange;
+    border: 2px solid rgb(0, 0, 0);
+}
+.social-icons a {
+    display: inline-block;
+    margin: 10px;
+}
+.social-icons img {
+    width: 30px;
+}
+.toggle-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    background: orange;
+    color: rgb(255, 0, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 40px 40px 40px 40px;
+    transition: left 0.5s ease-in-out;
+    text-align: center;
+    flex-direction: column;
+}
+.toggle-container h1,
+.toggle-container p,
+.toggle-container button {
+    transition: opacity 0.3s ease-in-out;
+}
+.container.active .toggle-container h1 {
+    opacity: 1;
+}
+.container.active .toggle-container p {
+    opacity: 1;
+}
+.container.active .toggle-container button {
+    opacity: 1;
+}
+.container.active .toggle-container {
+    left: 0;
+}

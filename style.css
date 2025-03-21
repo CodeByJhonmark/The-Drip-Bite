@@ -1,0 +1,133 @@
+html{
+    scroll-behavior: smooth;
+}
+body {
+    background-color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    margin: 0;
+}
+header {
+    position: sticky;
+    top: 0;
+    width: 1251px;
+    background-color: orange;
+    color: white;
+    padding: 10px 0;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 50px;
+}
+footer {
+    background-color: orange;
+    color: white;
+    height: 50px;
+    padding: 5px;
+}
+#home{
+    height: 500px;
+    padding: 50px;
+}
+#menu{
+    height: 500px;
+    padding-top: 80px;
+    padding-bottom: 80px;
+}
+#contact{
+    height: 500px;
+}
+nav {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+nav ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin: 0;
+    padding: 0;
+}
+nav ul li {
+    display: inline-block;
+}
+nav ul li a {
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+    transition: ease-out 0.1s;
+}
+
+nav ul li a:hover {
+    color: red;
+    border: solid white;
+    background-color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+nav h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: red;
+    text-transform: uppercase;
+    flex-grow: 1;
+    text-align: left;
+    margin: 0;
+}
+.logo {
+    width: 100px;
+    height: auto;
+}
+.logo2{
+    position: absolute;
+    display: flex;
+    width: 500px;
+    left: 100px;
+    z-index: -1;
+}
+#home .text{
+    position: absolute;
+    top: 190px;
+    right: 200px;
+    z-index: -1;
+}
+a{
+    text-decoration: none;
+    color: black;
+}
+.menu-items {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+.item {
+    background-color: #f8f8f8;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    font-size: 18px;
+    transition: ease-out 0.3s;
+}
+.item:hover{
+    background-color: #e9e8e8;
+    padding: 45px;
+}
+.food-image {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+}
+#contact{
+    background-color: rgb(221, 212, 212);
+}
+.copyright{
+    position: absolute;
+    left: 100px;
+}
