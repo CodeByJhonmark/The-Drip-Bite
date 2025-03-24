@@ -21,15 +21,35 @@ loginBtn.addEventListener("click", () => {
     toggleContainer.replaceChild(registerBtn, loginBtn);
 });
 
-document.querySelector(".sign-in form").addEventListener("submit", function(event) {
+document.getElementById("signup-form").addEventListener("submit", function(event) {
     event.preventDefault();
+    let username = document.getElementById("sign-up username").value;
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("sign-up password").value;
+    
+    let user = { username: username, email: email, password: password };
+    localStorage.setItem(username, JSON.stringify(user));
 
-    const username = document.querySelector(".sign-in input[type='text']").value;
-    const password = document.querySelector(".sign-in input[type='password']").value;
+    alert("Registration successful! You can now log in.");
+    window.location.href = "index.html";
+});
 
-    if (username === "example123" && password === "example123") {
-        window.location.href = "mainpage.html";
-    } else {
-        alert("Invalid username or password. Try again!");
+document.getElementById("login-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
+    
+    var user = localStorage.getItem(username);
+
+    if(user){
+        var parsedUser = JSON.parse(user);
+        if (parsedUser.password === password) {
+            localStorage.setItem("user", JSON.stringify(parsedUser));
+            alert("Login successful!");
+            window.location.href = "mainpage.html";
+        } else {
+            alert("Invalid username or password.");
+        }
     }
+    
 });
