@@ -45,7 +45,6 @@ document.getElementById("login-form").addEventListener("submit", function(event)
         var parsedUser = JSON.parse(user);
         if (parsedUser.password === password) {
             localStorage.setItem("user", JSON.stringify(parsedUser));
-            alert("Login successful!");
             window.location.href = "mainpage.html";
         } else {
             alert("Invalid username or password.");
