@@ -10,7 +10,8 @@ body {
     margin: 0;
 }
 header {
-    position: sticky;
+    position: fixed;
+    width: 100%;
     top: 0;
     background-color: orange;
     color: white;
@@ -28,7 +29,6 @@ footer {
     padding: 5px;
 }
 #home{
-    margin-top:80px;
     height: 500px;
     padding: 50px;
 }
@@ -41,37 +41,29 @@ footer {
     height: 500px;
 }
 nav {
+    margin-right: 100px;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-nav ul {
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 30px;
-    margin: 0;
-    padding: 0;
-}
-nav ul li {
-    display: inline-block;
-}
-nav ul li a {
+nav a { 
     color: black;
     text-decoration: none;
     font-weight: bold;
     transition: ease-out 0.1s;
+    margin-left: 35px;
 }
 
-nav ul li a:hover {
+nav a:hover{
     color: red;
     border: solid white;
     background-color: white;
     padding: 2px 8px;
     border-radius: 10px;
 }
-nav h1 {
+nav h1{
+    position: relative;
     font-size: 24px;
     font-weight: bold;
     color: red;
@@ -80,15 +72,38 @@ nav h1 {
     text-align: left;
     margin: 0;
 }
-.logo {
+nav h1::before{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 100%;
+    background: orange;
+    animation: showleft 1s ease forwards;
+    animation-delay: .5s;
+}
+.logo{
+    position: relative;
     width: 100px;
     height: auto;
+}
+.logo::before{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 100%;
+    background: orange;
+    animation: showright 1s ease forwards;
+    animation-delay: 1s;
 }
 .logo2{
     position: absolute;
     display: flex;
     width: 500px;
-    left: 100px;
+    left: 50px;
     z-index: -1;
 }
 #home .text{
@@ -130,4 +145,10 @@ a{
 .copyright{
     position: absolute;
     left: 100px;
+}
+
+@keyframes showleft{
+    100%{
+        width: 0;
+    }
 }
