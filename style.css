@@ -176,6 +176,7 @@ footer {
 }
 
 #contact-form button {
+    border-radius: 10px;
     padding: 10px;
     background-color: #D22B2B;
     color: white;
