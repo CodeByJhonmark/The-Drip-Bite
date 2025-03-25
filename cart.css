@@ -74,8 +74,10 @@ body {
 }
 p{
     position: relative;
-    z-index: 100;
-    top: 300px;
+    width: 150px;
+    z-index: 1000;
+    left: 325px;
+    top: 190px;
     font-weight: 600;
 }
 ul {
