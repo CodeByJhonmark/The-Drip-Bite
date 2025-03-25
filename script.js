@@ -52,3 +52,25 @@ document.getElementById("login-form").addEventListener("submit", function(event)
     }
     
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const card = document.getElementById('buy_or_cart');
+    const button = document.getElementById('showCardBtn');
+
+    button.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default <a> behavior
+        event.stopPropagation();
+
+        // Set card position based on cursor click
+        card.style.left = event.pageX + 'px';
+        card.style.top = event.pageY + 'px';
+        card.style.display = 'block';
+    });
+
+    // Hide the card when clicking outside
+    document.addEventListener("click", function(e) {
+        if (!card.contains(e.target) && e.target !== button) {
+            card.style.display = 'none';
+        }
+    });
+});
