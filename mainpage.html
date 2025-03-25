@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="style2.css">
     <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
 </head>
 <body>
         <div class="loader">
@@ -145,6 +145,7 @@
                     <a href="#home" class="active">Home</a>
                     <a href="#menu">Menu</a>
                     <a href="#contact">Contact</a> 
+                    <a href="cart.html" class="cart"><box-icon name='cart'></box-icon></a>
             </nav>
         </header>
     
@@ -152,7 +153,7 @@
         <img src="assets/LOGO.png" alt="" class="logo2">
         <div class="text">
             <h1>Welcome to The Drip Bite</h1>
-            <p>Your go-to spot for Burgers, Pizza, Milk Tea, Fries, and Hotdog Sandwiches!</p>
+            <p>Welcome to your ultimate destination for all things delicious!,  Whether you're craving a quick snack or a full meal, we've got something to satisfy every appetite. Come and experience the perfect blend of taste, quality, and satisfaction in every bite!</p>
         </div>
         <div class="card-home">
             <h1>BEST SELLER</h1>
@@ -161,7 +162,7 @@
                 <a href="">
                     <img src="assets/chicken salad.png" alt="Juicy Burger" class="food-image">
                     <p>Chicken Salad</p>
-                    <p><b>₱ 150</b></p>
+                    <p><b>₱ 600</b></p>
                 </a>
             </div>
             <img src="assets/5star.png" alt="" class="ratings1">
@@ -171,7 +172,7 @@
                 <a href="">
                     <img src="assets/sushi rolls.png" alt="Juicy Burger" class="food-image">
                     <p>Sushi Rolls</p>
-                    <p><b>₱ 150</b></p>
+                    <p><b>₱ 750</b></p>
                 </a>
             </div>
             <img src="assets/5star.png" alt="" class="ratings2">
@@ -179,112 +180,112 @@
     </section>
     
     <section id="menu">
-        <h2>Our Menu</h2>
+        <h2 class="menu">Our Menu</h2>
         <div class="menu-items">
             <div class="item">
-                <a href="#" class="button" id="showCardBtn">
+                <button class="open-btn" data-name="Juicy Burger" data-price="100" id="popupButton">
                     <img src="assets/burger.png" alt="Juicy Burger" class="food-image">
                     <p>Juicy Burgers</p>
-                    <p><b>₱ 150</b></p>
-                </a>
+                    <p><b>₱ 100</b></p>
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Cheesy Pizza" data-price="300" id="popupButton">
                     <img src="assets/pizza.png" alt="Cheesy Pizza" class="food-image">
                     <p>Cheesy Pizza</p>
-                    <p><b>₱ 150</b></p>
-                </a>          
+                    <p><b>₱ 300</b></p>
+                </button>          
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Roested Chicken" data-price="399" id="popupButton">
                     <img src="assets/roastChicken.png" alt="Refreshing Milk Tea" class="food-image">
                     <p>Roested Chicken</p>
-                    <p><b>₱ 150</b></p>
-                </a>
+                    <p><b>₱ 399</b></p>
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Crispy Fries" data-price="100" id="popupButton">
                     <img src="assets/fries.png" alt="Fries" class="food-image">
                     <p>Crispy Fries</p>
-                    <p><b>₱ 150</b></p>  
-                </a>
+                    <p><b>₱ 100</b></p>  
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Hotdog Sandwiches" data-price="120" id="popupButton">
                     <img src="assets/hotdogsandwich.png" alt="Loaded Hotdog Sandwich" class="food-image">
                     <p> Hotdog Sandwiches</p>
-                    <p><b>₱ 150</b></p>
-                </a>
+                    <p><b>₱ 120</b></p>
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Lemonade" data-price="70" id="popupButton">
                     <img src="assets/lemonade.png" alt="Juicy Burger" class="food-image">
                     <p>Lemonade</p>
-                    <p><b>₱ 150</b></p>
-                </a>
+                    <p><b>₱ 70</b></p>
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Fruit Shake" data-price="80" id="popupButton">
                     <img src="assets/fruit juice.png" alt="Cheesy Pizza" class="food-image">
                     <p>Fruit Shake</p>
-                    <p><b>₱ 150</b></p>
-                </a>          
+                    <p><b>₱ 80</b></p>
+                </button>          
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Bubble Tea" data-price="100" id="popupButton">
                     <img src="assets/milktea.png" alt="Refreshing Milk Tea" class="food-image">
                     <p>Bubble Tea</p>
-                    <p><b>₱ 150</b></p>
-                </a>
+                    <p><b>₱ 100</b></p>
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Iced Coffee" data-price="80" id="popupButton">
                     <img src="assets/iced coffee.png" alt="Fries" class="food-image">
                     <p>Iced Coffee</p>
-                    <p><b>₱ 150</b></p>
-                </a>
+                    <p><b>₱ 80</b></p>
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Coffee latte" data-price="100" id="popupButton">
                     <img src="assets/coffee latte.png" alt="Loaded Hotdog Sandwich" class="food-image">
                     <p>Coffee latte</p>
-                    <p><b>₱ 150</b></p>
-                </a>
+                    <p><b>₱ 100</b></p>
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Burritos" data-price="170" id="popupButton">
                     <img src="assets/burritos.png" alt="Juicy Burger" class="food-image">
                     <p>Burritos</p>
-                    <p><b>₱ 150</b></p>
-                </a>
+                    <p><b>₱ 170</b></p>
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Mozzarilla Stick" data-price="100" id="popupButton">
                     <img src="assets/mozarilla sticks.png" alt="Cheesy Pizza" class="food-image">
                     <p>Mozzarilla Stick</p>
-                    <p><b>₱ 150</b></p>
-                </a>          
+                    <p><b>₱ 100</b></p>
+                </button>          
             </div>
             <div class="item">
-                <a href="#" onclick="showCard()">
+                <button class="open-btn" data-name="Nachos" data-price="80" id="popupButton">
                     <img src="assets/nachos.png" alt="Refreshing Milk Tea" class="food-image">
                     <p>Nachos</p>
-                    <p><b>₱ 150</b></p>
-                </a>
+                    <p><b>₱ 80</b></p>
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="BBQ Ribs" data-price="599" id="popupButton">
                     <img src="assets/bbq ribs.png" alt="Fries" class="food-image">
                     <p>BBQ Ribs</p> 
-                    <p><b>₱ 150</b></p> 
-                </a>
+                    <p><b>₱ 599</b></p> 
+                </button>
             </div>
             <div class="item">
-                <a href="#">
+                <button class="open-btn" data-name="Crispy Nuggets" data-price="199" id="popupButton">
                     <img src="assets/nuggets.png" alt="Loaded Hotdog Sandwich" class="food-image">
                     <p>Crispy Nuggets</p>
-                    <p><b>₱ 150</b></p>
-                </a>
+                    <p><b>₱ 199</b></p>
+                </buttons>
             </div>
         </div>
     </section>
@@ -292,16 +293,14 @@
     <section id="contact">
         <h1>Contact Us For Order</h1>
     
-        <!-- Social Media Links (Centered) -->
         <div class="social-links">
             <a href="https://facebook.com/thedripbite" target="_blank"><i class="fa-brands fa-facebook"></i> Facebook</a>
             <a href="https://instagram.com/thedripbite" target="_blank"><i class="fa-brands fa-instagram"></i> Instagram</a>
             <a href="https://twitter.com/thedripbite" target="_blank"><i class="fa-brands fa-twitter"></i> Twitter</a>
         </div>
     
-        <!-- Contact Info + Form + Map Container -->
         <div class="contact-container">
-            <!-- Google Map (Left) -->
+
             <div class="map-container">
                 <iframe 
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1930284.4350319514!2d120.5790083594518!3d14.599512391312961!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c8d0c456e5f1%3A0xa4a6f0e9c1a28a0!2sManila%2C%20Metro%20Manila%2C%20Philippines!5e0!3m2!1sen!2sph!4v1711368000000!5m2!1sen!2sph"
@@ -309,8 +308,8 @@
                 </iframe>
             </div>
     
-            <!-- Contact Form (Right) -->
             <form id="contact-form">
+                <h2>Fill up For Best Seller Menu</h2>
                 <input type="text" name="name" placeholder="Your Name" required>
                 <input type="email" name="email" placeholder="Your Email" required>
                 <textarea name="message" placeholder="Your Message" required></textarea>
@@ -318,19 +317,102 @@
             </form>
         </div>
     
-        <!-- Operating Hours (Bottom Center) -->
         <div class="operating-hours">
             <h3>Operating Hours</h3>
             <p>Monday - Friday: 9 AM - 8 PM</p>
             <p>Saturday - Sunday: 10 AM - 10 PM</p>
         </div>
     </section>
-    
-    
+
     <footer>
         <p class="copyright"> &copy; 2025 The Drip Bite. All rights reserved.</p>
         <p>Country: Phillipines</p>
     </footer>
+
+    <div class="overlay" id="overlay">
+        <div class="popup-card" onclick="event.stopPropagation()">
+            <h3 id="product-title">Product Details</h3>
+            <p id="product-price"></p>
+            <button class="add-cart">Add to Cart</button>
+            <button class="buy-now">Buy Now</button>
+        </div>
+    </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+            let buttons = document.querySelectorAll(".open-btn");
+
+            buttons.forEach(button => {
+                button.addEventListener("click", openPopup);
+            });
+
+        document.getElementById("overlay").addEventListener("click", closePopup);
+    });
+
+        function openPopup() {
+            let overlay = document.getElementById("overlay");
+            overlay.style.display = "flex";
+        }
+
+        function closePopup(event) {
+            if (event.target.id === "overlay") {
+                document.getElementById("overlay").style.display = "none";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+        let selectedProduct = {}; // Store the selected product
+
+        // Function to open popup and set product details
+        function openPopup(button) {
+            let name = button.getAttribute("data-name");
+            let price = button.getAttribute("data-price");
+
+            selectedProduct = { name, price }; // Store selected product
+
+            document.getElementById("product-title").innerText = name;
+            document.getElementById("product-price").innerText = `₱ ${price}`;
+
+            document.getElementById("overlay").style.display = "flex";
+        }
+
+        // Function to add product to cart
+        function addToCartAndRedirect(redirect = false) {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push(selectedProduct);
+            localStorage.setItem("cart", JSON.stringify(cart));
+
+            document.getElementById("overlay").style.display = "none"; // Close popup
+
+            if (redirect) {
+                window.location.href = "cart.html"; // Redirect if "Buy Now" is clicked
+            }
+        }
+
+        // Attach event listeners to all product buttons
+        document.querySelectorAll(".open-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                openPopup(this);
+            });
+        });
+
+        // Handle clicking "Add to Cart" and "Buy Now"
+        document.querySelector(".add-cart").addEventListener("click", function () {
+            addToCartAndRedirect(false); // Just add to cart
+        });
+
+        document.querySelector(".buy-now").addEventListener("click", function () {
+            addToCartAndRedirect(true); // Add to cart and redirect
+        });
+
+        // Close popup when clicking outside
+        document.getElementById("overlay").addEventListener("click", function (event) {
+            if (event.target.id === "overlay") {
+                document.getElementById("overlay").style.display = "none";
+            }
+        });
+    });
+</script>
 </body>
 </html>

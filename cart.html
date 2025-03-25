@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<head>
+    <title>The Drip Bite/Cart</title>
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="cart.css">
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+</head>
+<body>
+    <div class="cart_content">
+        <button class="back-button" onclick="goBack()"><box-icon name='arrow-back'></box-icon></button>
+        
+        <h1>Your Cart</h1>
+        
+        <ul id="cart-items"></ul>
+        <p id="total-price">Total: ₱0</p>
+        <button class="clear-cart" onclick="clearCart()">Clear Cart</button>
+        
+        <button class="buy-button" onclick="gotoBuy()">Buy</button>
+        
+    </div>
+
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+
+        function loadCart() {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        let cartItems = document.getElementById("cart-items");
+        let total = 0;
+        cartItems.innerHTML = ""; 
+
+        cart.forEach((item, index) => {
+            let li = document.createElement("li");
+            li.innerHTML = `${item.name} - ₱${item.price} 
+                <button onclick="removeItem(${index})">Remove</button>`;
+            cartItems.appendChild(li);
+
+            total += parseInt(item.price);
+        });
+
+        document.getElementById("total-price").innerText = `Total: ₱${total}`;
+    }
+
+    function removeItem(index) {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart();
+    }
+
+    function clearCart() {
+        localStorage.removeItem("cart");
+        loadCart();
+    }
+
+    function gotoBuy() {
+        alert("Thank you for your purchase!");
+        localStorage.removeItem("cart");
+        loadCart();
+    }
+    loadCart(); 
+    </script>
+</body>
+</html>
