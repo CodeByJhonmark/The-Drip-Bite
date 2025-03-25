@@ -74,6 +74,7 @@ body {
 }
 p{
     position: relative;
+    z-index: 100;
     top: 300px;
     font-weight: 600;
 }
