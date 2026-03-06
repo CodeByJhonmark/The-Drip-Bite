@@ -8,18 +8,75 @@
 <body>
     <div class="cart_content">
         <button class="back-button" onclick="goBack()"><box-icon name='arrow-back'></box-icon></button>
-        
         <h1>Your Cart</h1>
-        
         <ul id="cart-items"></ul>
         <p id="total-price">Total: ₱0</p>
         <button class="clear-cart" onclick="clearCart()">Clear Cart</button>
-        
-        <button class="buy-button" onclick="gotoBuy()">Buy</button>
-        
+        <button class="buy-button" onclick="openPayment()">Buy</button>
+    </div>
+
+    <!-- PAYMENT METHOD POPUP -->
+    <div class="pay-overlay" id="pay-overlay" style="display:none;">
+        <div class="pay-card">
+            <div class="pay-header">
+                <span>💳 PAYMENT METHOD</span>
+                <button class="cancel-btn" onclick="closePayment()">Cancel</button>
+            </div>
+
+            <!-- Payment Options -->
+            <div class="pay-options">
+                <label class="pay-option" id="opt-cash" onclick="selectPayment('cash')">
+                    <input type="radio" name="payment" value="cash">
+                    <span>Cash on Delivery</span>
+                </label>
+                <label class="pay-option" id="opt-gcash" onclick="selectPayment('gcash')">
+                    <input type="radio" name="payment" value="gcash">
+                    <span>Gcash or Maya</span>
+                </label>
+                <label class="pay-option" id="opt-card" onclick="selectPayment('card')">
+                    <input type="radio" name="payment" value="card">
+                    <span>Debit or Credit</span>
+                </label>
+            </div>
+
+            <!-- GCash/Maya Fields -->
+            <div class="pay-fields" id="gcash-fields" style="display:none;">
+                <input type="tel" id="gcash-number" placeholder="GCash / Maya Number" maxlength="11" oninput="checkGcash()">
+                <input type="number" id="gcash-amount" placeholder="Amount (₱)" oninput="checkGcash()">
+            </div>
+
+            <!-- Debit/Credit Fields -->
+            <div class="pay-fields" id="card-fields" style="display:none;">
+                <input type="text" id="card-number" placeholder="Account Number" maxlength="16" oninput="checkCard()">
+                <input type="password" id="card-pin" placeholder="4-digit Pincode" maxlength="4" oninput="checkCard()">
+            </div>
+
+            <!-- Proceed Button -->
+            <button class="proceed-btn" id="proceed-btn" disabled onclick="proceedOrder()">Proceed Order</button>
+        </div>
+    </div>
+
+    <!-- RECEIPT POPUP -->
+    <div class="pay-overlay" id="receipt-overlay" style="display:none;">
+        <div class="receipt-card">
+            <div class="receipt-header">
+                <img src="assets/LOGO.png" alt="Logo" class="receipt-logo">
+                <h2>The Drip Bite</h2>
+                <p class="receipt-sub">Official Receipt</p>
+            </div>
+            <hr>
+            <div id="receipt-body"></div>
+            <hr>
+            <div id="receipt-total"></div>
+            <div id="receipt-method"></div>
+            <p class="receipt-thank">Thank you for your order! 🎉</p>
+            <button class="close-receipt-btn" onclick="closeReceipt()">Close</button>
+        </div>
     </div>
 
     <script>
+        let selectedPayment = "";
+
         function goBack() {
             window.history.back();
         }
@@ -43,7 +100,6 @@
                     <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
                 `;
                 cartItems.appendChild(li);
-
                 total += parseInt(item.price) * item.quantity;
             });
 
@@ -53,11 +109,7 @@
         function changeQuantity(index, delta) {
             let cart = JSON.parse(localStorage.getItem("cart")) || [];
             cart[index].quantity += delta;
-
-            if (cart[index].quantity <= 0) {
-                cart.splice(index, 1);
-            }
-
+            if (cart[index].quantity <= 0) cart.splice(index, 1);
             localStorage.setItem("cart", JSON.stringify(cart));
             loadCart();
         }
@@ -74,13 +126,336 @@
             loadCart();
         }
 
-        function gotoBuy() {
-            alert("Thank you for your purchase!");
+        function openPayment() {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+            // Reset everything
+            selectedPayment = "";
+            document.querySelectorAll("input[name='payment']").forEach(r => r.checked = false);
+            document.querySelectorAll(".pay-option").forEach(o => o.classList.remove("selected"));
+            document.getElementById("gcash-fields").style.display = "none";
+            document.getElementById("card-fields").style.display = "none";
+            document.getElementById("gcash-number").value = "";
+            document.getElementById("gcash-amount").value = "";
+            document.getElementById("card-number").value = "";
+            document.getElementById("card-pin").value = "";
+            disableProceed();
+            document.getElementById("pay-overlay").style.display = "flex";
+        }
+
+        function closePayment() {
+            document.getElementById("pay-overlay").style.display = "none";
+        }
+
+        function selectPayment(type) {
+            selectedPayment = type;
+
+            document.querySelectorAll("input[name='payment']").forEach(r => r.checked = r.value === type);
+            document.querySelectorAll(".pay-option").forEach(opt => {
+                opt.classList.toggle("selected", opt.querySelector("input").value === type);
+            });
+
+            document.getElementById("gcash-fields").style.display = type === "gcash" ? "block" : "none";
+            document.getElementById("card-fields").style.display = type === "card" ? "block" : "none";
+
+            // Reset inputs when switching
+            document.getElementById("gcash-number").value = "";
+            document.getElementById("gcash-amount").value = "";
+            document.getElementById("card-number").value = "";
+            document.getElementById("card-pin").value = "";
+
+            if (type === "cash") {
+                enableProceed();
+            } else {
+                disableProceed();
+            }
+        }
+
+        function enableProceed() {
+            let btn = document.getElementById("proceed-btn");
+            btn.disabled = false;
+            btn.style.backgroundColor = "orange";
+            btn.style.cursor = "pointer";
+        }
+
+        function disableProceed() {
+            let btn = document.getElementById("proceed-btn");
+            btn.disabled = true;
+            btn.style.backgroundColor = "#ccc";
+            btn.style.cursor = "not-allowed";
+        }
+
+        function checkGcash() {
+            let num = document.getElementById("gcash-number").value.trim();
+            let amt = document.getElementById("gcash-amount").value.trim();
+            if (num.length >= 11 && amt !== "" && parseFloat(amt) > 0) {
+                enableProceed();
+            } else {
+                disableProceed();
+            }
+        }
+
+        function checkCard() {
+            let num = document.getElementById("card-number").value.trim();
+            let pin = document.getElementById("card-pin").value.trim();
+            if (num.length >= 10 && pin.length === 4) {
+                enableProceed();
+            } else {
+                disableProceed();
+            }
+        }
+
+        function proceedOrder() {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            let total = cart.reduce((sum, item) => sum + parseInt(item.price) * item.quantity, 0);
+            let user = JSON.parse(localStorage.getItem("user")) || {};
+            let now = new Date();
+            let dateStr = now.toLocaleDateString("en-PH") + "  " + now.toLocaleTimeString("en-PH");
+
+            // Receipt items
+            let itemsHtml = cart.map(item => `
+                <div class="receipt-item">
+                    <span>${item.name} x${item.quantity}</span>
+                    <span>₱${parseInt(item.price) * item.quantity}</span>
+                </div>
+            `).join("");
+            document.getElementById("receipt-body").innerHTML = itemsHtml;
+
+            document.getElementById("receipt-total").innerHTML = `
+                <div class="receipt-item total-row">
+                    <span><b>TOTAL</b></span>
+                    <span><b>₱${total}</b></span>
+                </div>
+            `;
+
+            let methodText = "";
+            if (selectedPayment === "cash") {
+                methodText = "Cash on Delivery";
+            } else if (selectedPayment === "gcash") {
+                let num = document.getElementById("gcash-number").value;
+                methodText = `GCash / Maya — ${num}`;
+            } else if (selectedPayment === "card") {
+                let num = document.getElementById("card-number").value;
+                let masked = "*".repeat(Math.max(0, num.length - 4)) + num.slice(-4);
+                methodText = `Debit / Credit — ${masked}`;
+            }
+
+            document.getElementById("receipt-method").innerHTML = `
+                <p class="receipt-info"><b>Payment:</b> ${methodText}</p>
+                <p class="receipt-info"><b>Customer:</b> ${user.username || "Guest"}</p>
+                <p class="receipt-info"><b>Date:</b> ${dateStr}</p>
+            `;
+
+            closePayment();
+            document.getElementById("receipt-overlay").style.display = "flex";
             localStorage.removeItem("cart");
             loadCart();
         }
 
+        function closeReceipt() {
+            document.getElementById("receipt-overlay").style.display = "none";
+        }
+
         loadCart();
     </script>
+
+    <style>
+        .pay-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .pay-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            width: 340px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .pay-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .cancel-btn {
+            background: #ddd !important;
+            color: #333 !important;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            width: auto !important;
+        }
+
+        .cancel-btn:hover {
+            background: #bbb !important;
+        }
+
+        .pay-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .pay-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: 0.2s;
+            user-select: none;
+        }
+
+        .pay-option:hover {
+            background: #f9f9f9;
+        }
+
+        .pay-option.selected {
+            background: #fff5e0;
+            border-color: orange;
+        }
+
+        .pay-option input[type="radio"] {
+            width: 17px;
+            height: 17px;
+            accent-color: orange;
+            pointer-events: none;
+        }
+
+        .pay-fields {
+            margin-bottom: 14px;
+        }
+
+        .pay-fields input {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .pay-fields input:focus {
+            border-color: orange;
+        }
+
+        .proceed-btn {
+            width: 100%;
+            padding: 13px;
+            background-color: #ccc;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .proceed-btn:not([disabled]):hover {
+            background-color: #cc7000 !important;
+        }
+
+        /* Receipt */
+        .receipt-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            width: 340px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .receipt-header .receipt-logo {
+            width: 65px;
+            margin-bottom: 6px;
+        }
+
+        .receipt-header h2 {
+            color: red;
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .receipt-sub {
+            color: #888;
+            font-size: 13px;
+            margin: 2px 0 10px;
+        }
+
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .total-row {
+            font-size: 16px;
+            padding: 8px 0;
+        }
+
+        .receipt-info {
+            font-size: 13px;
+            text-align: left;
+            margin: 5px 0;
+            color: #444;
+        }
+
+        .receipt-thank {
+            font-size: 15px;
+            font-weight: bold;
+            color: orange;
+            margin: 14px 0 10px;
+        }
+
+        .close-receipt-btn {
+            width: 100%;
+            padding: 11px;
+            background: orange;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .close-receipt-btn:hover {
+            background: red;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px dashed #ccc;
+            margin: 10px 0;
+        }
+    </style>
 </body>
-</html>
+    </html>
