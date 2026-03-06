@@ -145,7 +145,8 @@
                     <a href="#home" class="active">Home</a> 
                     <a href="#menu">Menu</a> 
                     <a href="#contact">Contact</a>  
-                    <a href="cart.html" class="cart"><box-icon name='cart'></box-icon></a> 
+                    <a href="cart.html" class="cart"><box-icon name='cart'></box-icon></a>
+                    <button onclick="logout()" class="logout-btn">Logout</button>
             </nav> 
         </header> 
      
@@ -402,6 +403,29 @@
             } 
         }); 
     }); 
-</script> 
+
+    function logout() {
+        localStorage.removeItem("user");
+        window.location.href = "index.html";
+    }
+</script>
+<style>
+    .logout-btn {
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-left: 15px;
+        transition: 0.2s;
+    }
+    .logout-btn:hover {
+        background-color: white;
+        color: red;
+    }
+</style> 
 </body> 
-    </html>
+                </html>
