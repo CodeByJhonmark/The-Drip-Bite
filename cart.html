@@ -4,6 +4,8 @@
     <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="cart.css">
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
     <div class="cart_content">
@@ -70,7 +72,20 @@
             <div id="receipt-total"></div>
             <div id="receipt-method"></div>
             <p class="receipt-thank">Thank you for your order! 🎉</p>
+            <button class="track-btn" onclick="openTracking()">🏍️ Track My Order</button>
             <button class="close-receipt-btn" onclick="closeReceipt()">Close</button>
+        </div>
+    </div>
+
+    <!-- TRACKING POPUP -->
+    <div class="pay-overlay" id="tracking-overlay" style="display:none;">
+        <div class="tracking-card">
+            <div class="tracking-header">
+                <span>🏍️ Order Tracking</span>
+            </div>
+            <p class="tracking-status">Your rider is on the way! 🚀</p>
+            <div id="tracking-map"></div>
+            <button class="close-receipt-btn" style="margin-top:12px;" onclick="closeTracking()">Close</button>
         </div>
     </div>
 
@@ -224,10 +239,17 @@
             `).join("");
             document.getElementById("receipt-body").innerHTML = itemsHtml;
 
+            // Generate unique transaction code
+            let txCode = "TDB-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+
             document.getElementById("receipt-total").innerHTML = `
                 <div class="receipt-item total-row">
                     <span><b>TOTAL</b></span>
                     <span><b>₱${total}</b></span>
+                </div>
+                <div class="receipt-item tx-row">
+                    <span style="font-size:12px; color:#888;">Transaction Code:</span>
+                    <span class="tx-code">${txCode}</span>
                 </div>
             `;
 
@@ -253,6 +275,40 @@
             document.getElementById("receipt-overlay").style.display = "flex";
             localStorage.removeItem("cart");
             loadCart();
+        }
+
+        let trackingMap = null;
+        let riderMarker = null;
+
+        function openTracking() {
+            document.getElementById("tracking-overlay").style.display = "flex";
+            setTimeout(() => {
+                if (!trackingMap) {
+                    trackingMap = L.map("tracking-map").setView([14.5995, 120.9842], 14);
+                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                        attribution: "&copy; OpenStreetMap contributors"
+                    }).addTo(trackingMap);
+
+                    // Motorcycle icon
+                    let motoIcon = L.divIcon({
+                        html: "<div style=\"font-size:28px; line-height:1;\">🏍️</div>",
+                        className: "",
+                        iconSize: [36, 36],
+                        iconAnchor: [18, 18]
+                    });
+
+                    riderMarker = L.marker([14.5995, 120.9842], { icon: motoIcon })
+                        .addTo(trackingMap)
+                        .bindPopup("Your rider is here!")
+                        .openPopup();
+                } else {
+                    trackingMap.invalidateSize();
+                }
+            }, 300);
+        }
+
+        function closeTracking() {
+            document.getElementById("tracking-overlay").style.display = "none";
         }
 
         function closeReceipt() {
@@ -420,6 +476,20 @@
             padding: 8px 0;
         }
 
+        .tx-row {
+            font-size: 12px;
+            color: #888;
+            padding: 4px 0 8px;
+        }
+
+        .tx-code {
+            font-family: monospace;
+            font-size: 12px;
+            color: orange;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
         .receipt-info {
             font-size: 13px;
             text-align: left;
@@ -456,6 +526,48 @@
             border-top: 1px dashed #ccc;
             margin: 10px 0;
         }
+        .track-btn {
+            width: 100%;
+            padding: 11px;
+            background: #333;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 8px;
+        }
+        .track-btn:hover {
+            background: orange;
+        }
+        .tracking-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            width: 370px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .tracking-header {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .tracking-status {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        #tracking-map {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid orange;
+        }
     </style>
 </body>
-    </html>
+                </html>
