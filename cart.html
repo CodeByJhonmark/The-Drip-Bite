@@ -371,7 +371,6 @@
 
             if (selectedPayment === "gcash") {
                 var wallet = document.getElementById("gcash-select").value;
-                var card = document.getElementById("qr-card");
                 var header = document.getElementById("qr-header");
                 var logoRow = document.getElementById("qr-logo-row");
                 var instruction = document.getElementById("qr-instruction");
@@ -388,8 +387,9 @@
 
                 document.getElementById("pay-overlay").style.display = "none";
                 document.getElementById("qr-overlay").style.display = "flex";
+
             } else {
-                // Cash on delivery — skip QR, go to receipt
+                document.getElementById("pay-overlay").style.display = "none";
                 generateReceipt();
             }
         }
