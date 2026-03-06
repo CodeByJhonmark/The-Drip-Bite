@@ -242,17 +242,6 @@
             // Generate unique transaction code
             let txCode = "TDB-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
 
-            document.getElementById("receipt-total").innerHTML = `
-                <div class="receipt-item total-row">
-                    <span><b>TOTAL</b></span>
-                    <span><b>₱${total}</b></span>
-                </div>
-                <div class="receipt-item tx-row">
-                    <span style="font-size:12px; color:#888;">Transaction Code:</span>
-                    <span class="tx-code">${txCode}</span>
-                </div>
-            `;
-
             let methodText = "";
             if (selectedPayment === "cash") {
                 methodText = "Cash on Delivery";
@@ -265,11 +254,22 @@
                 methodText = `Debit / Credit — ${masked}`;
             }
 
-            document.getElementById("receipt-method").innerHTML = `
+            document.getElementById("receipt-total").innerHTML = `
+                <div class="receipt-item total-row">
+                    <span><b>TOTAL</b></span>
+                    <span><b>₱${total}</b></span>
+                </div>
+                <div class="receipt-item tx-row">
+                    <span style="font-size:12px; color:#888;">Transaction Code:</span>
+                    <span class="tx-code">${txCode}</span>
+                </div>
+                <hr style="border:none; border-top:1px dashed #eee; margin:6px 0;">
                 <p class="receipt-info"><b>Payment:</b> ${methodText}</p>
                 <p class="receipt-info"><b>Customer:</b> ${user.username || "Guest"}</p>
                 <p class="receipt-info"><b>Date:</b> ${dateStr}</p>
             `;
+
+            document.getElementById("receipt-method").innerHTML = "";
 
             closePayment();
             document.getElementById("receipt-overlay").style.display = "flex";
@@ -440,7 +440,7 @@
             border-radius: 14px;
             padding: 24px;
             width: 340px;
-            max-height: 85vh;
+            max-height: 92vh;
             overflow-y: auto;
             overflow-x: hidden;
             box-shadow: 0 8px 30px rgba(0,0,0,0.3);
@@ -578,4 +578,4 @@
         }
     </style>
 </body>
-    </html>
+</html>
