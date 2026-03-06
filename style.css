@@ -21,6 +21,7 @@ header {
     align-items: center;
     justify-content: space-between;
     padding: 0 50px;
+    z-index: 1000;
 }
 footer {
     background-color: orange;
@@ -36,9 +37,9 @@ footer {
 .card-home{
     position: absolute;
     height: 500px;
-    width: 650px;
+    width: 600px;
     top: 100px;
-    right: 50px;
+    right: 30px;
     padding: 15px;
     border-radius: 10px;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.9);
@@ -290,14 +291,14 @@ nav h1::before{
     z-index: -2;
 }
 #home .text p{
-    font-weight: 600;
+    font-weight: 400;
 }
 #home .text{
     border-radius: 30px;
     position: absolute;
     width: 550px;
     top: 450px;
-    left: 50px;
+    left: 20px;
     z-index: -1;
 }
 #home .text::before{
@@ -335,16 +336,16 @@ button:hover{
 }
 .item {
     background-color: #f8f8f8;
-    padding: 15px;
+    padding: 10px;
     margin-bottom: 50px;
     border-radius: 10px;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
     font-size: 18px;
-    transition: ease-out 0.3s;
+    transition: ease-out 0.4s;
 }
 .item:hover{
     background-color: #e9e8e8;
-    padding: 30px;
+    transform: scale(1.05);
 }
 .food-image {
     width: 200px;
