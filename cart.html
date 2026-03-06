@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<head>
+    <title>The Drip Bite/Cart</title>
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="cart.css">
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+    <div class="cart_content">
+        <button class="back-button" onclick="goBack()"><box-icon name='arrow-back'></box-icon></button>
+        <h1>Your Cart</h1>
+        <ul id="cart-items"></ul>
+        <p id="total-price">Total: ₱0</p>
+        <button class="clear-cart" onclick="clearCart()">Clear Cart</button>
+        <button class="buy-button" onclick="openDeliveryTime()">Proceed Order</button>
+    </div>
+
+    <!-- STEP 1: ESTIMATED DELIVERY TIME POPUP -->
+    <div class="pay-overlay" id="delivery-time-overlay" style="display:none;">
+        <div class="pay-card step-card">
+            <div class="step-indicator">
+                <div class="step active">1<span>Delivery</span></div>
+                <div class="step-line"></div>
+                <div class="step">2<span>Address</span></div>
+                <div class="step-line"></div>
+                <div class="step">3<span>Payment</span></div>
+            </div>
+            <h3 style="text-align:center; color:#333; margin-bottom:16px;">Estimated Delivery</h3>
+
+            <div class="delivery-option selected" id="opt-standard" onclick="selectDelivery('standard')">
+                <div class="delivery-icon">🛵</div>
+                <div class="delivery-info">
+                    <strong>Standard</strong>
+                    <span>5 – 20 mins</span>
+                </div>
+                <div class="delivery-check" id="check-standard">✓</div>
+            </div>
+
+            <div class="delivery-option" id="opt-priority" onclick="selectDelivery('priority')">
+                <div class="delivery-icon">⚡</div>
+                <div class="delivery-info">
+                    <strong>Priority</strong>
+                    <span>5 – 15 mins</span>
+                    <small style="color:#888;">Get your order faster</small>
+                </div>
+                <div class="delivery-badge">+ ₱19.00</div>
+                <div class="delivery-check hidden" id="check-priority">✓</div>
+            </div>
+
+            <div class="delivery-option" id="opt-scheduled" onclick="selectDelivery('scheduled')">
+                <div class="delivery-icon">📅</div>
+                <div class="delivery-info">
+                    <strong>Scheduled</strong>
+                    <span>Select a date and time</span>
+                </div>
+                <div class="delivery-check hidden" id="check-scheduled">✓</div>
+            </div>
+
+            <div id="scheduled-fields" style="display:none; margin-top:10px;">
+                <input type="datetime-local" id="scheduled-datetime" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:14px; box-sizing:border-box;">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:18px;">
+                <button class="cancel-btn" onclick="closeDeliveryTime()">Cancel</button>
+                <button class="proceed-btn" style="background:orange;" onclick="openAddress()">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 2: DELIVERY ADDRESS POPUP -->
+    <div class="pay-overlay" id="address-overlay" style="display:none;">
+        <div class="pay-card step-card">
+            <div class="step-indicator">
+                <div class="step done">✓<span>Delivery</span></div>
+                <div class="step-line active-line"></div>
+                <div class="step active">2<span>Address</span></div>
+                <div class="step-line"></div>
+                <div class="step">3<span>Payment</span></div>
+            </div>
+            <h3 style="color:#333; margin-bottom:14px;">Delivery Address</h3>
+
+            <div class="address-box">
+                <div class="address-row">
+                    <span class="address-icon">📍</span>
+                    <div class="address-text">
+                        <input type="text" id="address-label" placeholder="Label (e.g. Home, Office)" style="font-weight:bold; width:100%; border:none; border-bottom:1px solid #eee; padding:4px 0; font-size:14px; outline:none;">
+                        <input type="text" id="address-street" placeholder="Street / Barangay" style="width:100%; border:none; border-bottom:1px solid #eee; padding:4px 0; font-size:13px; color:#555; outline:none; margin-top:4px;">
+                        <input type="text" id="address-city" placeholder="City / Province" style="width:100%; border:none; padding:4px 0; font-size:13px; color:#555; outline:none; margin-top:4px;">
+                    </div>
+                </div>
+                <button class="gps-btn" onclick="useGPS()">
+                    <span id="gps-icon">📡</span> Use My Current Location
+                </button>
+                <p id="gps-status" style="font-size:12px; color:#888; margin:4px 0 0; text-align:center;"></p>
+            </div>
+
+            <div class="address-box" style="margin-top:10px;">
+                <label style="font-size:13px; color:#555; display:block; margin-bottom:6px;">Delivery instructions</label>
+                <textarea id="delivery-note" placeholder="Note to rider – e.g. landmark, gate code..." style="width:100%; height:70px; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:13px; resize:none; box-sizing:border-box;"></textarea>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:16px;">
+                <button class="cancel-btn" onclick="backToDelivery()">Back</button>
+                <button class="proceed-btn" style="background:orange;" onclick="openPayment()">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 3: PAYMENT METHOD POPUP -->
+    <div class="pay-overlay" id="pay-overlay" style="display:none;">
+        <div class="pay-card step-card">
+            <div class="step-indicator">
+                <div class="step done">✓<span>Delivery</span></div>
+                <div class="step-line active-line"></div>
+                <div class="step done">✓<span>Address</span></div>
+                <div class="step-line active-line"></div>
+                <div class="step active">3<span>Payment</span></div>
+            </div>
+
+            <div class="pay-header">
+                <span>💳 PAYMENT METHOD</span>
+                <button class="cancel-btn" onclick="backToAddress()">Back</button>
+            </div>
+
+            <div class="pay-options">
+                <label class="pay-option" id="opt-cash" onclick="selectPayment('cash')">
+                    <input type="radio" name="payment" value="cash">
+                    <span>💵 Cash on Delivery</span>
+                </label>
+                <label class="pay-option" id="opt-gcash" onclick="selectPayment('gcash')">
+                    <input type="radio" name="payment" value="gcash">
+                    <span>📱 GCash or Maya</span>
+                </label>
+            </div>
+
+            <div class="pay-fields" id="gcash-fields" style="display:none;">
+                <label style="font-size:13px; color:#555; margin-bottom:6px; display:block;">Choose your e-wallet:</label>
+                <select id="gcash-select" onchange="checkGcash()" style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:8px; font-size:14px; box-sizing:border-box; outline:none; cursor:pointer;">
+                    <option value="">-- Select --</option>
+                    <option value="GCash">GCash</option>
+                    <option value="Maya">Maya</option>
+                </select>
+            </div>
+
+            <button class="proceed-btn" id="proceed-btn" disabled onclick="proceedOrder()">Proceed Order</button>
+        </div>
+    </div>
+
+    <!-- QR CODE POPUP -->
+    <div class="pay-overlay" id="qr-overlay" style="display:none;">
+        <div class="qr-card" id="qr-card">
+            <div class="qr-header" id="qr-header">
+                <div class="qr-logo-row" id="qr-logo-row"></div>
+                <p class="qr-scan-text">SCAN TO PAY HERE</p>
+            </div>
+            <div class="qr-body">
+                <p class="qr-merchant">The Drip Bite</p>
+                <!-- Replace src with your actual QR code image path e.g. assets/gcash-qr.png -->
+                <img id="qr-image" src="assets/qr-placeholder.png" alt="QR Code" class="qr-img">
+                <p class="qr-instruction" id="qr-instruction">Open your app and scan the QR code above to complete your payment.</p>
+            </div>
+            <button class="qr-paid-btn" onclick="confirmPayment()">✅ I've Already Paid</button>
+            <button class="cancel-btn" style="width:calc(100% - 40px); margin:0 20px 16px; text-align:center; display:block;" onclick="backToPayment()">Back</button>
+        </div>
+    </div>
+
+    <!-- RECEIPT POPUP -->
+    <div class="pay-overlay" id="receipt-overlay" style="display:none;">
+        <div class="receipt-card">
+            <div class="receipt-header">
+                <img src="assets/LOGO.png" alt="Logo" class="receipt-logo">
+                <h2>The Drip Bite</h2>
+                <p class="receipt-sub">Official Receipt</p>
+            </div>
+            <hr>
+            <div id="receipt-body"></div>
+            <hr>
+            <div id="receipt-total"></div>
+            <div id="receipt-method"></div>
+            <p class="receipt-thank">Thank you for your order! 🎉</p>
+            <button class="track-btn" onclick="openTracking()">🏍️ Track My Order</button>
+            <button class="close-receipt-btn" onclick="closeReceipt()">Close</button>
+        </div>
+    </div>
+
+    <!-- TRACKING POPUP -->
+    <div class="pay-overlay" id="tracking-overlay" style="display:none;">
+        <div class="tracking-card">
+            <div class="tracking-header">
+                <span>🏍️ Order Tracking</span>
+            </div>
+            <p class="tracking-status">Your rider is on the way! 🚀</p>
+            <div id="tracking-map"></div>
+            <button class="close-receipt-btn" style="margin-top:12px;" onclick="closeTracking()">Close</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var selectedPayment = "";
+        var selectedDelivery = "standard";
+        var userLat = null, userLng = null;
+
+        function goBack() { window.history.back(); }
+
+        function loadCart() {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            var cartItems = document.getElementById("cart-items");
+            var total = 0;
+            cartItems.innerHTML = "";
+
+            cart.forEach((item, index) => {
+                var li = document.createElement("li");
+                li.innerHTML = `
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-price">₱${item.price}</span>
+                    <div class="quantity-controls">
+                        <button class="qty-btn" onclick="changeQuantity(${index}, -1)">−</button>
+                        <span class="qty-number">${item.quantity}</span>
+                        <button class="qty-btn" onclick="changeQuantity(${index}, 1)">+</button>
+                    </div>
+                    <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+                `;
+                cartItems.appendChild(li);
+                total += parseInt(item.price) * item.quantity;
+            });
+
+            document.getElementById("total-price").innerText = `Total: ₱${total}`;
+        }
+
+        function changeQuantity(index, delta) {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart[index].quantity += delta;
+            if (cart[index].quantity <= 0) cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            loadCart();
+        }
+
+        function removeItem(index) {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            loadCart();
+        }
+
+        function clearCart() {
+            localStorage.removeItem("cart");
+            loadCart();
+        }
+
+        // ── STEP 1: Delivery time ──
+        function openDeliveryTime() {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart.length === 0) { alert("Your cart is empty!"); return; }
+            document.getElementById("delivery-time-overlay").style.display = "flex";
+        }
+
+        function closeDeliveryTime() {
+            document.getElementById("delivery-time-overlay").style.display = "none";
+        }
+
+        function selectDelivery(type) {
+            selectedDelivery = type;
+            ["standard", "priority", "scheduled"].forEach(t => {
+                document.getElementById("opt-" + t).classList.toggle("selected", t === type);
+                document.getElementById("check-" + t).classList.toggle("hidden", t !== type);
+            });
+            document.getElementById("scheduled-fields").style.display = type === "scheduled" ? "block" : "none";
+        }
+
+        // ── STEP 2: Address ──
+        function openAddress() {
+            document.getElementById("delivery-time-overlay").style.display = "none";
+            document.getElementById("address-overlay").style.display = "flex";
+        }
+
+        function backToDelivery() {
+            document.getElementById("address-overlay").style.display = "none";
+            document.getElementById("delivery-time-overlay").style.display = "flex";
+        }
+
+        function useGPS() {
+            var status = document.getElementById("gps-status");
+            var icon = document.getElementById("gps-icon");
+            if (!navigator.geolocation) {
+                status.textContent = "Geolocation not supported on this device.";
+                return;
+            }
+            status.textContent = "Locating...";
+            icon.textContent = "⏳";
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    userLat = pos.coords.latitude;
+                    userLng = pos.coords.longitude;
+                    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json`)
+                        .then(r => r.json())
+                        .then(data => {
+                            var addr = data.address || {};
+                            document.getElementById("address-street").value =
+                                [addr.road, addr.suburb, addr.neighbourhood].filter(Boolean).join(", ") || "";
+                            document.getElementById("address-city").value =
+                                [addr.city || addr.town || addr.municipality, addr.state].filter(Boolean).join(", ") || "";
+                            document.getElementById("address-label").value = "Current Location";
+                            status.textContent = "✅ Location detected!";
+                            icon.textContent = "📡";
+                        })
+                        .catch(() => {
+                            status.textContent = `✅ GPS: ${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
+                            icon.textContent = "📡";
+                        });
+                },
+                err => {
+                    status.textContent = "Could not get location. Please enter manually.";
+                    icon.textContent = "📡";
+                }
+            );
+        }
+
+        // ── STEP 3: Payment ──
+        function openPayment() {
+            document.getElementById("address-overlay").style.display = "none";
+            selectedPayment = "";
+            document.querySelectorAll("input[name='payment']").forEach(r => r.checked = false);
+            document.querySelectorAll(".pay-option").forEach(o => o.classList.remove("selected"));
+            document.getElementById("gcash-fields").style.display = "none";
+            document.getElementById("gcash-select").value = "";
+            disableProceed();
+            document.getElementById("pay-overlay").style.display = "flex";
+        }
+
+        function backToAddress() {
+            document.getElementById("pay-overlay").style.display = "none";
+            document.getElementById("address-overlay").style.display = "flex";
+        }
+
+        function selectPayment(type) {
+            selectedPayment = type;
+            document.querySelectorAll("input[name='payment']").forEach(r => r.checked = r.value === type);
+            document.querySelectorAll(".pay-option").forEach(opt => {
+                opt.classList.toggle("selected", opt.querySelector("input").value === type);
+            });
+            document.getElementById("gcash-fields").style.display = type === "gcash" ? "block" : "none";
+            document.getElementById("gcash-select").value = "";
+            if (type === "cash") { enableProceed(); } else { disableProceed(); }
+        }
+
+        function enableProceed() {
+            var btn = document.getElementById("proceed-btn");
+            btn.disabled = false;
+            btn.style.backgroundColor = "orange";
+            btn.style.cursor = "pointer";
+        }
+
+        function disableProceed() {
+            var btn = document.getElementById("proceed-btn");
+            btn.disabled = true;
+            btn.style.backgroundColor = "#ccc";
+            btn.style.cursor = "not-allowed";
+        }
+
+        function checkGcash() {
+            var val = document.getElementById("gcash-select").value;
+            if (val) { enableProceed(); } else { disableProceed(); }
+        }
+
+        // ── STEP 4: Proceed Order — show QR or go to receipt ──
+        function proceedOrder() {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart.length === 0) return;
+
+            if (selectedPayment === "gcash") {
+                var wallet = document.getElementById("gcash-select").value;
+                var header = document.getElementById("qr-header");
+                var logoRow = document.getElementById("qr-logo-row");
+                var instruction = document.getElementById("qr-instruction");
+
+                if (wallet === "GCash") {
+                    header.style.background = "#0070F0";
+                    logoRow.innerHTML = `<span style="font-size:26px; font-weight:900; color:white; letter-spacing:-1px;">G)) GCash</span>`;
+                    instruction.textContent = "Open your GCash app and scan the QR code above to complete your payment.";
+                } else {
+                    header.style.background = "linear-gradient(135deg, #5B2D8E 0%, #3DB88B 100%)";
+                    logoRow.innerHTML = `<span style="font-size:34px; font-weight:900; color:#3DB88B; font-style:italic; letter-spacing:-1px;">maya</span>`;
+                    instruction.textContent = "Open your Maya app and scan the QR code above to complete your payment.";
+                }
+
+                document.getElementById("pay-overlay").style.display = "none";
+                document.getElementById("qr-overlay").style.display = "flex";
+
+            } else {
+                // Cash on delivery — skip QR, go straight to receipt
+                document.getElementById("pay-overlay").style.display = "none";
+                generateReceipt();
+            }
+        }
+
+        function backToPayment() {
+            document.getElementById("qr-overlay").style.display = "none";
+            document.getElementById("pay-overlay").style.display = "flex";
+        }
+
+        function confirmPayment() {
+            document.getElementById("qr-overlay").style.display = "none";
+            generateReceipt();
+        }
+
+        // ── STEP 5: Generate Receipt ──
+        function generateReceipt() {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            var total = cart.reduce((sum, item) => sum + parseInt(item.price) * item.quantity, 0);
+            if (selectedDelivery === "priority") total += 19;
+            var user = JSON.parse(localStorage.getItem("user")) || {};
+            var now = new Date();
+            var dateStr = now.toLocaleDateString("en-PH") + "  " + now.toLocaleTimeString("en-PH");
+
+            var itemsHtml = cart.map(item => `
+                <div class="receipt-item">
+                    <span>${item.name} x${item.quantity}</span>
+                    <span>₱${parseInt(item.price) * item.quantity}</span>
+                </div>
+            `).join("");
+            document.getElementById("receipt-body").innerHTML = itemsHtml;
+
+            var txCode = "TDB-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+
+            var methodText = "";
+            if (selectedPayment === "cash") {
+                methodText = "Cash on Delivery";
+            } else {
+                var wallet = document.getElementById("gcash-select").value;
+                methodText = wallet + " (QR Payment)";
+            }
+
+            var deliveryLabel = selectedDelivery === "priority" ? "Priority (5–15 mins) +₱19" :
+                                selectedDelivery === "scheduled" ? "Scheduled – " + (document.getElementById("scheduled-datetime").value || "TBD") :
+                                "Standard (5–20 mins)";
+
+            var addressLabel = document.getElementById("address-label").value || "";
+            var addressStreet = document.getElementById("address-street").value || "";
+            var addressCity = document.getElementById("address-city").value || "";
+            var fullAddress = [addressLabel, addressStreet, addressCity].filter(Boolean).join(", ") || "Not provided";
+
+            document.getElementById("receipt-total").innerHTML = `
+                <div class="receipt-item total-row">
+                    <span><b>TOTAL</b></span>
+                    <span><b>₱${total}</b></span>
+                </div>
+                <div class="receipt-item tx-row">
+                    <span style="font-size:12px; color:#888;">Transaction Code:</span>
+                    <span class="tx-code">${txCode}</span>
+                </div>
+                <hr style="border:none; border-top:1px dashed #eee; margin:6px 0;">
+                <p class="receipt-info"><b>Payment:</b> ${methodText}</p>
+                <p class="receipt-info"><b>Delivery:</b> ${deliveryLabel}</p>
+                <p class="receipt-info"><b>Address:</b> ${fullAddress}</p>
+                <p class="receipt-info"><b>Customer:</b> ${user.username || "Guest"}</p>
+                <p class="receipt-info"><b>Date:</b> ${dateStr}</p>
+            `;
+
+            document.getElementById("receipt-method").innerHTML = "";
+            document.getElementById("receipt-overlay").style.display = "flex";
+            localStorage.removeItem("cart");
+            loadCart();
+        }
+
+        // ── Tracking ──
+        var trackingMap = null;
+
+        function openTracking() {
+            document.getElementById("tracking-overlay").style.display = "flex";
+            setTimeout(() => {
+                if (!trackingMap) {
+                    var lat = userLat || 14.5995;
+                    var lng = userLng || 120.9842;
+                    trackingMap = L.map("tracking-map").setView([lat, lng], 14);
+                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                        attribution: "&copy; OpenStreetMap contributors"
+                    }).addTo(trackingMap);
+
+                    var motoIcon = L.divIcon({
+                        html: "<div style=\"font-size:28px; line-height:1;\">🏍️</div>",
+                        className: "",
+                        iconSize: [36, 36],
+                        iconAnchor: [18, 18]
+                    });
+
+                    L.marker([lat, lng], { icon: motoIcon })
+                        .addTo(trackingMap)
+                        .bindPopup("Your rider is here!")
+                        .openPopup();
+                } else {
+                    trackingMap.invalidateSize();
+                }
+            }, 300);
+        }
+
+        function closeTracking() { document.getElementById("tracking-overlay").style.display = "none"; }
+        function closeReceipt() { document.getElementById("receipt-overlay").style.display = "none"; }
+
+        loadCart();
+    </script>
+
+    <style>
+        /* ── Overlay ── */
+        .pay-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        /* ── Step card ── */
+        .step-card {
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+
+        .pay-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            width: 360px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            box-sizing: border-box;
+        }
+
+        /* ── Step indicator ── */
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: #bbb;
+            background: #eee;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .step span {
+            position: absolute;
+            bottom: -18px;
+            font-size: 10px;
+            white-space: nowrap;
+            font-weight: normal;
+            color: #aaa;
+        }
+
+        .step.active { background: orange; color: white; }
+        .step.active span { color: orange; font-weight: bold; }
+        .step.done { background: #4caf50; color: white; }
+        .step.done span { color: #4caf50; }
+
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background: #eee;
+            margin: 0 4px;
+            margin-bottom: 18px;
+        }
+
+        .active-line { background: orange; }
+
+        /* ── Delivery options ── */
+        .delivery-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: 0.2s;
+        }
+
+        .delivery-option:hover { background: #fff8f0; }
+        .delivery-option.selected { border-color: orange; background: #fff5e0; }
+        .delivery-icon { font-size: 22px; }
+
+        .delivery-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            font-size: 14px;
+        }
+
+        .delivery-info strong { font-size: 15px; }
+        .delivery-info span { color: #555; font-size: 13px; }
+
+        .delivery-badge {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .delivery-check { color: orange; font-weight: bold; font-size: 18px; }
+        .delivery-check.hidden { visibility: hidden; }
+
+        /* ── Address box ── */
+        .address-box {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .address-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .address-icon { font-size: 22px; margin-top: 4px; }
+        .address-text { flex: 1; }
+
+        .gps-btn {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: block;
+        }
+
+        .gps-btn:hover { background: orange; }
+
+        /* ── Payment ── */
+        .pay-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .cancel-btn {
+            background: #ddd !important;
+            color: #333 !important;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            width: auto !important;
+        }
+
+        .cancel-btn:hover { background: #bbb !important; }
+
+        .pay-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .pay-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: 0.2s;
+            user-select: none;
+        }
+
+        .pay-option:hover { background: #f9f9f9; }
+        .pay-option.selected { background: #fff5e0; border-color: orange; }
+
+        .pay-option input[type="radio"] {
+            width: 17px;
+            height: 17px;
+            accent-color: orange;
+            pointer-events: none;
+        }
+
+        .pay-fields { margin-bottom: 14px; }
+        .pay-fields select:focus { border-color: orange; }
+
+        .proceed-btn {
+            width: 100%;
+            padding: 13px;
+            background-color: #ccc;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .proceed-btn:not([disabled]):hover { filter: brightness(0.88); }
+
+        /* ── QR Code Card ── */
+        .qr-card {
+            background: white;
+            border-radius: 16px;
+            width: 320px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+            box-sizing: border-box;
+        }
+
+        .qr-header {
+            padding: 24px 20px 16px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        .qr-logo-row { margin-bottom: 8px; }
+
+        .qr-scan-text {
+            color: white;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin: 0;
+            position: static !important;
+            width: auto !important;
+            left: auto !important;
+            top: auto !important;
+        }
+
+        .qr-body {
+            padding: 16px 20px;
+            text-align: center;
+            background: white;
+        }
+
+        .qr-merchant {
+            font-weight: bold;
+            font-size: 16px;
+            color: #222;
+            margin: 0 0 12px;
+            position: static !important;
+            width: auto !important;
+            left: auto !important;
+            top: auto !important;
+        }
+
+        .qr-img {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .qr-instruction {
+            font-size: 12px;
+            color: #888;
+            margin: 10px 0 0;
+            position: static !important;
+            width: auto !important;
+            left: auto !important;
+            top: auto !important;
+        }
+
+        .qr-paid-btn {
+            display: block;
+            width: calc(100% - 40px);
+            margin: 16px 20px 8px;
+            padding: 13px;
+            background: orange;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+
+        .qr-paid-btn:hover { background: #cc7000; }
+
+        /* ── Receipt ── */
+        .receipt-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            width: 340px;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .receipt-header .receipt-logo { width: 65px; margin-bottom: 6px; }
+        .receipt-header h2 { color: red; margin: 0; font-size: 20px; }
+
+        .receipt-sub {
+            color: #888;
+            font-size: 13px;
+            margin: 2px 0 10px;
+            position: static !important;
+        }
+
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .total-row { font-size: 16px; padding: 8px 0; }
+        .tx-row { font-size: 12px; color: #888; padding: 4px 0 8px; }
+
+        .tx-code {
+            font-family: monospace;
+            font-size: 12px;
+            color: orange;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .receipt-info {
+            font-size: 13px;
+            text-align: left;
+            margin: 5px 0;
+            color: #444;
+            position: static !important;
+        }
+
+        .receipt-thank {
+            font-size: 15px;
+            font-weight: bold;
+            color: orange;
+            margin: 14px 0 10px;
+            position: static !important;
+        }
+
+        .close-receipt-btn {
+            width: 100%;
+            padding: 11px;
+            background: orange;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        .close-receipt-btn:hover { background: red; }
+
+        hr { border: none; border-top: 1px dashed #ccc; margin: 10px 0; }
+
+        .track-btn {
+            width: 100%;
+            padding: 11px;
+            background: #333;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        .track-btn:hover { background: orange; }
+
+        /* ── Tracking ── */
+        .tracking-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            width: 370px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .tracking-header {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .tracking-status { font-size: 13px; color: #888; margin-bottom: 10px; }
+
+        #tracking-map {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            border: 2px solid orange;
+        }
+    </style>
+</body>
+</html>
