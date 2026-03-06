@@ -23,10 +23,16 @@ loginBtn.addEventListener("click", () => {
 
 document.getElementById("signup-form").addEventListener("submit", function(event) {
     event.preventDefault();
-    let username = document.getElementById("sign-up username").value;
-    let email = document.getElementById("email").value;
+    let username = document.getElementById("sign-up username").value.trim();
+    let email = document.getElementById("email").value.trim();
     let password = document.getElementById("sign-up password").value;
-    
+
+    // ✅ Check if username is already taken
+    if (localStorage.getItem(username)) {
+        alert("Username already exists. Please choose a different one.");
+        return;
+    }
+
     let user = { username: username, email: email, password: password };
     localStorage.setItem(username, JSON.stringify(user));
 
@@ -36,20 +42,22 @@ document.getElementById("signup-form").addEventListener("submit", function(event
 
 document.getElementById("login-form").addEventListener("submit", function(event) {
     event.preventDefault();
-    let username = document.getElementById("username").value;
+    let username = document.getElementById("username").value.trim();
     let password = document.getElementById("password").value;
-    
+
     var user = localStorage.getItem(username);
 
-    if(user){
+    if (user) {
         var parsedUser = JSON.parse(user);
         if (parsedUser.password === password) {
             localStorage.setItem("user", JSON.stringify(parsedUser));
             window.location.href = "mainpage.html";
         } else {
-            alert("Invalid username or password.");
+            // ✅ Wrong password
+            alert("Incorrect password. Please try again.");
         }
+    } else {
+        // ✅ Username not found — was silently failing before
+        alert("Username not found. Please register first.");
     }
-    
-});
-//pop card for add to card
+});//pop card for add to card
