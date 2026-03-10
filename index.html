@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>The Drip Bite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="sign.css">
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+</head>
+<body> 
+    <div class="container" id="container">
+        <div class="form-container sign-in">
+            <form id="login-form">
+                <h1>Login</h1>
+                <input type="text" placeholder="Username" required id="username">
+                <input type="password" placeholder="Password" required id="password">
+                <a href="#">Forgot password?</a>
+                <button id="login-btn">Login</button>
+                <p>or login with social platforms</p>
+                <div class="social-icons">
+                    <a href="#"><img src="assets/googe.png" alt="Google"></a>
+                    <a href="#"><img src="assets/fbb.png" alt="Facebook"></a>
+                </div>
+            </form>
+        </div>
+        <div class="form-container sign-up">
+            <form id="signup-form">
+                <h1>Registration</h1>
+                <input type="text" placeholder="Username" required id="signup-username">
+                <input type="email" placeholder="Email" required id="email">
+                <input type="password" placeholder="Password" required id="signup-password">
+                <button id="register-btn">Register</button>
+                <p>or register with social platforms</p>
+                <div class="social-icons">
+                    <a href="#"><img src="assets/googe.png" alt="Google"></a>
+                    <a href="#"><img src="assets/fbb.png" alt="Facebook"></a>
+                </div>
+            </form>
+        </div>
+        <div class="toggle-container" id="toggle-container">
+            <img class="logo" src="assets/LOGO.png" alt="">
+            <h1 id="toggle-title">Hello, Welcome To The Drip Bite!</h1>
+            <p id="toggle-text">Don't have an account?</p>
+            <button class="toggle-button" id="register">Register</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

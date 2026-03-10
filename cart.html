@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>The Drip Bite/Cart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="cart.css">
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+</head>
+<body>
+    <div class="cart_content">
+        <button class="back-button" onclick="goBack()"><box-icon name='arrow-back'></box-icon></button>
+        <h1>Your Cart</h1>
+        <ul id="cart-items"></ul>
+        <p id="total-price">Total: ₱0</p>
+        <button class="clear-cart" onclick="clearCart()">Clear Cart</button>
+        <button class="buy-button" onclick="openDeliveryTime()">Proceed Order</button>
+    </div>
+
+    <!-- STEP 1: ESTIMATED DELIVERY TIME -->
+    <div class="pay-overlay" id="delivery-time-overlay" style="display:none;">
+        <div class="pay-card step-card">
+            <div class="step-indicator">
+                <div class="step active">1<span>Delivery</span></div>
+                <div class="step-line"></div>
+                <div class="step">2<span>Address</span></div>
+                <div class="step-line"></div>
+                <div class="step">3<span>Payment</span></div>
+            </div>
+            <h3 style="text-align:center; color:#333; margin-bottom:16px;">Estimated Delivery</h3>
+
+            <div class="delivery-option selected" id="opt-standard" onclick="selectDelivery('standard')">
+                <div class="delivery-icon">🛵</div>
+                <div class="delivery-info">
+                    <strong>Standard</strong>
+                    <span>5 – 20 mins</span>
+                </div>
+                <div class="delivery-check" id="check-standard">✓</div>
+            </div>
+
+            <div class="delivery-option" id="opt-priority" onclick="selectDelivery('priority')">
+                <div class="delivery-icon">⚡</div>
+                <div class="delivery-info">
+                    <strong>Priority</strong>
+                    <span>5 – 15 mins</span>
+                    <small style="color:#888;">Get your order faster</small>
+                </div>
+                <div class="delivery-badge">+ ₱19.00</div>
+                <div class="delivery-check hidden" id="check-priority">✓</div>
+            </div>
+
+            <div class="delivery-option" id="opt-scheduled" onclick="selectDelivery('scheduled')">
+                <div class="delivery-icon">📅</div>
+                <div class="delivery-info">
+                    <strong>Scheduled</strong>
+                    <span>Select a date and time</span>
+                </div>
+                <div class="delivery-check hidden" id="check-scheduled">✓</div>
+            </div>
+
+            <div id="scheduled-fields" style="display:none; margin-top:10px;">
+                <input type="datetime-local" id="scheduled-datetime" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:14px; box-sizing:border-box;">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:18px;">
+                <button class="cancel-btn" onclick="closeDeliveryTime()">Cancel</button>
+                <button class="proceed-btn" style="background:orange;" onclick="openAddress()">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 2: DELIVERY ADDRESS -->
+    <div class="pay-overlay" id="address-overlay" style="display:none;">
+        <div class="pay-card step-card">
+            <div class="step-indicator">
+                <div class="step done">✓<span>Delivery</span></div>
+                <div class="step-line active-line"></div>
+                <div class="step active">2<span>Address</span></div>
+                <div class="step-line"></div>
+                <div class="step">3<span>Payment</span></div>
+            </div>
+            <h3 style="color:#333; margin-bottom:14px;">Delivery Address</h3>
+
+            <div class="address-box">
+                <div class="address-row">
+                    <span class="address-icon">📍</span>
+                    <div class="address-text">
+                        <input type="text" id="address-label" placeholder="Label (e.g. Home, Office)" style="font-weight:bold; width:100%; border:none; border-bottom:1px solid #eee; padding:4px 0; font-size:14px; outline:none;">
+                        <input type="text" id="address-street" placeholder="Street / Barangay" style="width:100%; border:none; border-bottom:1px solid #eee; padding:4px 0; font-size:13px; color:#555; outline:none; margin-top:4px;">
+                        <input type="text" id="address-city" placeholder="City / Province" style="width:100%; border:none; padding:4px 0; font-size:13px; color:#555; outline:none; margin-top:4px;">
+                    </div>
+                </div>
+                <button class="gps-btn" onclick="useGPS()">
+                    <span id="gps-icon">📡</span> Use My Current Location
+                </button>
+                <p id="gps-status" style="font-size:12px; color:#888; margin:4px 0 0; text-align:center;"></p>
+            </div>
+
+            <div class="address-box" style="margin-top:10px;">
+                <label style="font-size:13px; color:#555; display:block; margin-bottom:6px;">Delivery instructions</label>
+                <textarea id="delivery-note" placeholder="Note to rider – e.g. landmark, gate code..." style="width:100%; height:70px; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:13px; resize:none; box-sizing:border-box;"></textarea>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:16px;">
+                <button class="cancel-btn" onclick="backToDelivery()">Back</button>
+                <button class="proceed-btn" style="background:orange;" onclick="openPayment()">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 3: PAYMENT METHOD -->
+    <div class="pay-overlay" id="pay-overlay" style="display:none;">
+        <div class="pay-card step-card">
+            <div class="step-indicator">
+                <div class="step done">✓<span>Delivery</span></div>
+                <div class="step-line active-line"></div>
+                <div class="step done">✓<span>Address</span></div>
+                <div class="step-line active-line"></div>
+                <div class="step active">3<span>Payment</span></div>
+            </div>
+
+            <div class="pay-header">
+                <span>💳 PAYMENT METHOD</span>
+                <button class="cancel-btn" onclick="backToAddress()">Back</button>
+            </div>
+
+            <div class="pay-options">
+                <label class="pay-option" id="opt-cash" onclick="selectPayment('cash')">
+                    <input type="radio" name="payment" value="cash">
+                    <span>💵 Cash on Delivery</span>
+                </label>
+                <label class="pay-option" id="opt-gcash" onclick="selectPayment('gcash')">
+                    <input type="radio" name="payment" value="gcash">
+                    <span>📱 GCash or Maya</span>
+                </label>
+            </div>
+
+            <div class="pay-fields" id="gcash-fields" style="display:none;">
+                <label style="font-size:13px; color:#555; margin-bottom:6px; display:block;">Choose your e-wallet:</label>
+                <select id="gcash-select" onchange="checkGcash()" style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:8px; font-size:14px; box-sizing:border-box; outline:none; cursor:pointer;">
+                    <option value="">-- Select --</option>
+                    <option value="GCash">GCash</option>
+                    <option value="Maya">Maya</option>
+                </select>
+            </div>
+
+            <button class="proceed-btn" id="proceed-btn" disabled onclick="proceedOrder()">Proceed Order</button>
+        </div>
+    </div>
+
+    <!-- QR CODE POPUP -->
+    <div class="pay-overlay" id="qr-overlay" style="display:none;">
+        <div class="qr-card">
+            <div class="qr-header" id="qr-header">
+                <div class="qr-title" id="qr-title">GCash</div>
+                <div class="qr-scan-text">SCAN TO PAY HERE</div>
+            </div>
+            <div class="qr-body">
+                <p class="qr-merchant">The Drip Bite</p>
+                <img id="qr-image" src="assets/qr-placeholder.png" alt="QR Code" class="qr-img">
+                <p class="qr-total" id="qr-total">Total: ₱0</p>
+                <p class="qr-instruction" id="qr-instruction">Open your e-wallet app and scan the QR code to complete your payment.</p>
+            </div>
+            <div class="qr-btn-row">
+                <button class="qr-back-btn" onclick="backToPayment()">Back</button>
+                <button class="qr-paid-btn" onclick="confirmPayment()">I've Paid ✓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECEIPT POPUP -->
+    <div class="pay-overlay" id="receipt-overlay" style="display:none;">
+        <div class="receipt-card">
+            <div class="receipt-header">
+                <img src="assets/LOGO.png" alt="Logo" class="receipt-logo">
+                <h2>The Drip Bite</h2>
+                <p class="receipt-sub">Official Receipt</p>
+            </div>
+            <hr>
+            <div id="receipt-body"></div>
+            <hr>
+            <div id="receipt-total"></div>
+            <div id="receipt-method"></div>
+            <p class="receipt-thank">Thank you for your order! 🎉</p>
+            <button class="track-btn" onclick="openTracking()">🏍️ Track My Order</button>
+            <button class="close-receipt-btn" onclick="closeReceipt()">Close</button>
+        </div>
+    </div>
+
+    <!-- TRACKING POPUP -->
+    <div class="pay-overlay" id="tracking-overlay" style="display:none;">
+        <div class="tracking-card">
+            <div class="tracking-top">
+                <span class="tracking-title">YOUR ORDER</span>
+            </div>
+
+            <div class="tracking-eta">
+                <p class="eta-label" id="eta-label">Estimated delivery time</p>
+                <p class="eta-time" id="eta-time">—</p>
+            </div>
+
+            <div class="tracking-illustration" id="tracking-illustration">
+                <div class="track-icon" id="track-icon">👨‍🍳</div>
+            </div>
+
+            <div class="track-progress">
+                <div class="track-bar" id="bar-1"></div>
+                <div class="track-bar" id="bar-2"></div>
+                <div class="track-bar" id="bar-3"></div>
+                <div class="track-bar" id="bar-4"></div>
+            </div>
+
+            <p class="track-status-text" id="track-status-text">
+                Preparing your food. Your rider will pick it up once it's ready.
+            </p>
+
+            <div class="track-address-box">
+                <div class="track-address-title">📍 Delivery details</div>
+                <p class="track-address-text" id="track-address-display">—</p>
+                <p class="track-note-text" id="track-note-display"></p>
+            </div>
+
+            <button class="close-track-btn" onclick="closeTracking()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        var selectedPayment = "";
+        var selectedDelivery = "standard";
+        var userLat = null, userLng = null;
+        var trackingInterval = null;
+        var etaCountdownInterval = null;
+        var gpsUsed = false;
+
+        /*
+         * STAGE TIMING (in seconds from order start):
+         *
+         * Standard (5–20 mins total):
+         *   Stage 1 – Preparing:       0s  → 3 mins  (180s)
+         *   Stage 2 – Rider heading:   3m  → 7 mins  (420s)
+         *   Stage 3 – On the way:      7m  → 14 mins (840s)
+         *   Stage 4 – Delivered:       14m+ (840s)
+         *
+         * Priority (5–15 mins total):
+         *   Stage 1 – Preparing:       0s  → 3 mins  (180s)
+         *   Stage 2 – Rider heading:   3m  → 6 mins  (360s)
+         *   Stage 3 – On the way:      6m  → 11 mins (660s)
+         *   Stage 4 – Delivered:       11m+ (660s)
+         *
+         * Scheduled – same as standard.
+         */
+        var STAGE_TIMES = {
+            standard: [0, 120, 420, 840],   // seconds from start when each stage begins
+            priority: [0, 120, 360, 660],
+            scheduled: [0, 120, 420, 840]
+        };
+
+        var trackStages = [
+            {
+                icon: "👨‍🍳",
+                text: "Preparing your food. Your rider will pick it up once it's ready.",
+                etaFn: function(secsLeft) { return secsLeft > 0 ? fmtTime(secsLeft) : "Soon..."; }
+            },
+            {
+                icon: "🏍️",
+                text: "We've got you a rider! They're heading to the restaurant.",
+                etaFn: function(secsLeft) { return secsLeft > 0 ? fmtTime(secsLeft) : "Almost there..."; }
+            },
+            {
+                icon: "🏍️",
+                text: "Your rider has picked up your order and is on the way to you!",
+                etaFn: function(secsLeft) { return secsLeft > 0 ? fmtTime(secsLeft) : "Almost there..."; }
+            },
+            {
+                icon: "✅",
+                text: "Your order has been delivered! Enjoy your meal! 🎉",
+                etaFn: function() { return "Delivered!"; }
+            }
+        ];
+
+        // Format seconds → "X min Y sec" or just "X min"
+        function fmtTime(secs) {
+            var m = Math.floor(secs / 60);
+            var s = secs % 60;
+            if (m > 0 && s > 0) return m + " min " + s + " sec";
+            if (m > 0) return m + " min";
+            return s + " sec";
+        }
+
+        // Returns current stage index (0–3) based on elapsed seconds
+        function getStageFromElapsed(elapsedSecs, deliveryType) {
+            var times = STAGE_TIMES[deliveryType] || STAGE_TIMES.standard;
+            var stage = 0;
+            for (var i = times.length - 1; i >= 0; i--) {
+                if (elapsedSecs >= times[i]) { stage = i; break; }
+            }
+            return stage;
+        }
+
+        // Seconds remaining until next stage (or 0 if delivered)
+        function getSecsRemaining(elapsedSecs, deliveryType) {
+            var times = STAGE_TIMES[deliveryType] || STAGE_TIMES.standard;
+            var totalDuration = times[times.length - 1];
+            var remaining = totalDuration - elapsedSecs;
+            return Math.max(0, remaining);
+        }
+
+        function goBack() { window.history.back(); }
+
+        function loadCart() {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            var cartItems = document.getElementById("cart-items");
+            var total = 0;
+            cartItems.innerHTML = "";
+            cart.forEach(function(item, index) {
+                var li = document.createElement("li");
+                li.innerHTML =
+                    '<span class="item-name">' + item.name + '</span>' +
+                    '<span class="item-price">₱' + item.price + '</span>' +
+                    '<div class="quantity-controls">' +
+                        '<button class="qty-btn" onclick="changeQuantity(' + index + ', -1)">−</button>' +
+                        '<span class="qty-number">' + item.quantity + '</span>' +
+                        '<button class="qty-btn" onclick="changeQuantity(' + index + ', 1)">+</button>' +
+                    '</div>' +
+                    '<button class="remove-btn" onclick="removeItem(' + index + ')">Remove</button>';
+                cartItems.appendChild(li);
+                total += parseInt(item.price) * item.quantity;
+            });
+            document.getElementById("total-price").innerText = "Total: ₱" + total;
+        }
+
+        function changeQuantity(index, delta) {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart[index].quantity += delta;
+            if (cart[index].quantity <= 0) cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            loadCart();
+        }
+
+        function removeItem(index) {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            loadCart();
+        }
+
+        function clearCart() {
+            localStorage.removeItem("cart");
+            loadCart();
+        }
+
+        function openDeliveryTime() {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart.length === 0) { alert("Your cart is empty!"); return; }
+            document.getElementById("delivery-time-overlay").style.display = "flex";
+        }
+
+        function closeDeliveryTime() {
+            document.getElementById("delivery-time-overlay").style.display = "none";
+        }
+
+        function selectDelivery(type) {
+            selectedDelivery = type;
+            ["standard", "priority", "scheduled"].forEach(function(t) {
+                document.getElementById("opt-" + t).classList.toggle("selected", t === type);
+                document.getElementById("check-" + t).classList.toggle("hidden", t !== type);
+            });
+            document.getElementById("scheduled-fields").style.display = type === "scheduled" ? "block" : "none";
+        }
+
+        function openAddress() {
+            document.getElementById("delivery-time-overlay").style.display = "none";
+            document.getElementById("address-overlay").style.display = "flex";
+        }
+
+        function backToDelivery() {
+            gpsUsed = false;
+            document.getElementById("address-overlay").style.display = "none";
+            document.getElementById("delivery-time-overlay").style.display = "flex";
+        }
+
+        function useGPS() {
+            var status = document.getElementById("gps-status");
+            var icon = document.getElementById("gps-icon");
+            if (!navigator.geolocation) { status.textContent = "Geolocation not supported."; return; }
+            status.textContent = "Locating...";
+            icon.textContent = "⏳";
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    userLat = pos.coords.latitude;
+                    userLng = pos.coords.longitude;
+                    fetch("https://nominatim.openstreetmap.org/reverse?lat=" + userLat + "&lon=" + userLng + "&format=json")
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            var addr = data.address || {};
+                            document.getElementById("address-street").value = [addr.road, addr.suburb, addr.neighbourhood].filter(Boolean).join(", ") || "";
+                            document.getElementById("address-city").value = [addr.city || addr.town || addr.municipality, addr.state].filter(Boolean).join(", ") || "";
+                            document.getElementById("address-label").value = "Current Location";
+                            status.style.color = "#4caf50";
+                            status.textContent = "✅ Location detected!";
+                            icon.textContent = "📡";
+                            gpsUsed = true;
+                            // Reset any red error styles
+                            document.getElementById("address-street").style.borderBottom = "1px solid #eee";
+                            document.getElementById("address-city").style.borderBottom = "1px solid #eee";
+                            document.getElementById("gps-status").style.color = "#4caf50";
+                        })
+                        .catch(function() {
+                            document.getElementById("address-street").value = "GPS: " + userLat.toFixed(5) + ", " + userLng.toFixed(5);
+                            document.getElementById("address-city").value = "Location detected";
+                            document.getElementById("address-label").value = "Current Location";
+                            status.style.color = "#4caf50";
+                            status.textContent = "✅ GPS located!";
+                            icon.textContent = "📡";
+                            gpsUsed = true;
+                        });
+                },
+                function() {
+                    status.style.color = "red";
+                    status.textContent = "⚠️ Location access denied. Please fill in your address manually.";
+                    icon.textContent = "📡";
+                }
+            );
+        }
+
+        function openPayment() {
+            // Validate: address fields filled OR GPS was used
+            var street = document.getElementById("address-street").value.trim();
+            var city   = document.getElementById("address-city").value.trim();
+            if (!street && !city && !gpsUsed) {
+                var status = document.getElementById("gps-status");
+                status.style.color = "red";
+                status.textContent = "⚠️ Please fill in your address or tap 'Use My Current Location'.";
+                document.getElementById("address-street").style.borderBottom = "1px solid red";
+                document.getElementById("address-city").style.borderBottom = "1px solid red";
+                return;
+            }
+            // Reset error styles
+            document.getElementById("gps-status").style.color = "#888";
+            document.getElementById("address-street").style.borderBottom = "1px solid #eee";
+            document.getElementById("address-city").style.borderBottom = "1px solid #eee";
+
+            document.getElementById("address-overlay").style.display = "none";
+            selectedPayment = "";
+            document.querySelectorAll("input[name='payment']").forEach(function(r) { r.checked = false; });
+            document.querySelectorAll(".pay-option").forEach(function(o) { o.classList.remove("selected"); });
+            document.getElementById("gcash-fields").style.display = "none";
+            document.getElementById("gcash-select").value = "";
+            disableProceed();
+            document.getElementById("pay-overlay").style.display = "flex";
+        }
+
+        function backToAddress() {
+            document.getElementById("pay-overlay").style.display = "none";
+            document.getElementById("address-overlay").style.display = "flex";
+        }
+
+        function selectPayment(type) {
+            selectedPayment = type;
+            document.querySelectorAll("input[name='payment']").forEach(function(r) { r.checked = r.value === type; });
+            document.querySelectorAll(".pay-option").forEach(function(opt) {
+                opt.classList.toggle("selected", opt.querySelector("input").value === type);
+            });
+            document.getElementById("gcash-fields").style.display = type === "gcash" ? "block" : "none";
+            document.getElementById("gcash-select").value = "";
+            if (type === "cash") { enableProceed(); } else { disableProceed(); }
+        }
+
+        function enableProceed() {
+            var btn = document.getElementById("proceed-btn");
+            btn.disabled = false; btn.style.backgroundColor = "orange"; btn.style.cursor = "pointer";
+        }
+
+        function disableProceed() {
+            var btn = document.getElementById("proceed-btn");
+            btn.disabled = true; btn.style.backgroundColor = "#ccc"; btn.style.cursor = "not-allowed";
+        }
+
+        function checkGcash() {
+            document.getElementById("gcash-select").value ? enableProceed() : disableProceed();
+        }
+
+        function proceedOrder() {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            if (cart.length === 0) return;
+
+            if (selectedPayment === "gcash") {
+                var wallet = document.getElementById("gcash-select").value;
+                var header = document.getElementById("qr-header");
+                var title = document.getElementById("qr-title");
+                var total = cart.reduce(function(sum, item) { return sum + parseInt(item.price) * item.quantity; }, 0);
+                if (selectedDelivery === "priority") total += 19;
+                document.getElementById("qr-total").innerText = "Total: ₱" + total;
+
+                if (wallet === "GCash") {
+                    header.style.background = "#1a8cff";
+                    title.textContent = "GCash"; title.style.color = "white"; title.style.fontStyle = "normal";
+                    document.getElementById("qr-instruction").textContent = "Open your GCash app and scan the QR code to complete your payment.";
+                } else {
+                    header.style.background = "linear-gradient(135deg, #5B2D8E 0%, #3DB88B 100%)";
+                    title.textContent = "maya"; title.style.color = "#3DB88B"; title.style.fontStyle = "italic";
+                    document.getElementById("qr-instruction").textContent = "Open your Maya app and scan the QR code to complete your payment.";
+                }
+                document.getElementById("pay-overlay").style.display = "none";
+                document.getElementById("qr-overlay").style.display = "flex";
+                // ✅ FIX: Update QR image based on wallet
+                document.getElementById("qr-image").src =
+                    wallet === "GCash" ? "assets/qr-gcash.png" : "assets/qr-maya.png";
+            } else {
+                document.getElementById("pay-overlay").style.display = "none";
+                generateReceipt();
+            }
+        }
+
+        function backToPayment() {
+            document.getElementById("qr-overlay").style.display = "none";
+            document.getElementById("pay-overlay").style.display = "flex";
+        }
+
+        function confirmPayment() {
+            document.getElementById("qr-overlay").style.display = "none";
+            generateReceipt();
+        }
+
+        function generateReceipt() {
+            var cart = JSON.parse(localStorage.getItem("cart")) || [];
+            var total = cart.reduce(function(sum, item) { return sum + parseInt(item.price) * item.quantity; }, 0);
+            if (selectedDelivery === "priority") total += 19;
+            var user = JSON.parse(localStorage.getItem("user")) || {};
+            var now = new Date();
+            var dateStr = now.toLocaleDateString("en-PH") + "  " + now.toLocaleTimeString("en-PH");
+
+            var itemsHtml = cart.map(function(item) {
+                return '<div class="receipt-item"><span>' + item.name + ' x' + item.quantity + '</span><span>₱' + (parseInt(item.price) * item.quantity) + '</span></div>';
+            }).join("");
+            document.getElementById("receipt-body").innerHTML = itemsHtml;
+
+            var txCode = "TDB-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+            var methodText = selectedPayment === "cash" ? "Cash on Delivery" : document.getElementById("gcash-select").value + " (QR Payment)";
+            var deliveryLabel = selectedDelivery === "priority" ? "Priority (5–15 mins) +₱19" :
+                                selectedDelivery === "scheduled" ? "Scheduled – " + (document.getElementById("scheduled-datetime").value || "TBD") :
+                                "Standard (5–20 mins)";
+
+            var addressLabel = document.getElementById("address-label").value.trim();
+            var addressStreet = document.getElementById("address-street").value.trim();
+            var addressCity = document.getElementById("address-city").value.trim();
+            var fullAddress = [addressLabel, addressStreet, addressCity].filter(Boolean).join(", ") || "Not provided";
+
+            document.getElementById("receipt-total").innerHTML =
+                '<div class="receipt-item total-row"><span><b>TOTAL</b></span><span><b>₱' + total + '</b></span></div>' +
+                '<div class="receipt-item tx-row"><span style="font-size:12px;color:#888;">Transaction Code:</span><span class="tx-code">' + txCode + '</span></div>' +
+                '<hr style="border:none;border-top:1px dashed #eee;margin:6px 0;">' +
+                '<p class="receipt-info"><b>Payment:</b> ' + methodText + '</p>' +
+                '<p class="receipt-info"><b>Delivery:</b> ' + deliveryLabel + '</p>' +
+                '<p class="receipt-info"><b>Address:</b> ' + fullAddress + '</p>' +
+                '<p class="receipt-info"><b>Customer:</b> ' + (user.username || "Guest") + '</p>' +
+                '<p class="receipt-info"><b>Date:</b> ' + dateStr + '</p>';
+
+            document.getElementById("receipt-method").innerHTML = "";
+            document.getElementById("receipt-overlay").style.display = "flex";
+
+            // ── Save tracking start time to localStorage so it persists across opens ──
+            localStorage.setItem("dripbite_order_start", Date.now().toString());
+            localStorage.setItem("dripbite_delivery_type", selectedDelivery);
+
+            // Save address for tracking display
+            localStorage.setItem("dripbite_address", fullAddress);
+            var note = document.getElementById("delivery-note").value.trim();
+            localStorage.setItem("dripbite_note", note);
+
+            localStorage.removeItem("cart");
+            loadCart();
+        }
+
+        // ────────────────────────────────────────────────
+        //  TRACKING — time-based, persistent across opens
+        // ────────────────────────────────────────────────
+        function openTracking() {
+            var addressDisplay = localStorage.getItem("dripbite_address") || "Not provided";
+            var noteDisplay    = localStorage.getItem("dripbite_note") || "";
+            document.getElementById("track-address-display").textContent = addressDisplay;
+            document.getElementById("track-note-display").textContent = noteDisplay ? "📝 " + noteDisplay : "";
+
+            document.getElementById("tracking-overlay").style.display = "flex";
+            startTrackingLoop();
+        }
+
+        function startTrackingLoop() {
+            // Clear any existing intervals
+            if (trackingInterval) clearInterval(trackingInterval);
+            if (etaCountdownInterval) clearInterval(etaCountdownInterval);
+
+            var startTime  = parseInt(localStorage.getItem("dripbite_order_start") || Date.now());
+            var delivType  = localStorage.getItem("dripbite_delivery_type") || "standard";
+            var totalSecs  = STAGE_TIMES[delivType][3]; // last stage start = "delivered" time
+
+            // Immediately render current stage
+            renderCurrentStage(startTime, delivType, totalSecs);
+
+            // Tick every second
+            trackingInterval = setInterval(function() {
+                var isOpen = document.getElementById("tracking-overlay").style.display !== "none";
+                if (!isOpen) { clearInterval(trackingInterval); return; }
+                renderCurrentStage(startTime, delivType, totalSecs);
+            }, 1000);
+        }
+
+        function renderCurrentStage(startTime, delivType, totalSecs) {
+            var elapsedSecs = Math.floor((Date.now() - startTime) / 1000);
+            var stage = getStageFromElapsed(elapsedSecs, delivType);
+            var secsRemaining = Math.max(0, totalSecs - elapsedSecs);
+            var s = trackStages[stage];
+
+            // Icon
+            document.getElementById("track-icon").textContent = s.icon;
+
+            // ETA
+            var etaEl = document.getElementById("eta-time");
+            var labelEl = document.getElementById("eta-label");
+            if (stage === 3) {
+                etaEl.textContent = "Delivered!";
+                etaEl.style.color = "orange";
+                labelEl.textContent = "Order status";
+            } else {
+                etaEl.textContent = fmtTime(secsRemaining);
+                etaEl.style.color = "#111";
+                labelEl.textContent = "Estimated delivery time";
+            }
+
+            // Status text
+            document.getElementById("track-status-text").textContent = s.text;
+
+            // Progress bars
+            for (var i = 1; i <= 4; i++) {
+                var bar = document.getElementById("bar-" + i);
+                bar.className = "track-bar";
+                if (i - 1 < stage) {
+                    bar.classList.add("bar-done");
+                } else if (i - 1 === stage && stage < 3) {
+                    bar.classList.add("bar-active");
+                } else if (stage === 3) {
+                    bar.classList.add("bar-done"); // all filled when delivered
+                }
+            }
+
+            // Illustration background
+            document.getElementById("tracking-illustration").style.background =
+                stage === 3 ? "#e8f5e9" : "#fff0f5";
+
+            // Stop interval if delivered
+            if (stage === 3) {
+                clearInterval(trackingInterval);
+            }
+        }
+
+        function closeTracking() {
+            document.getElementById("tracking-overlay").style.display = "none";
+            if (trackingInterval) clearInterval(trackingInterval);
+        }
+
+        function closeReceipt() {
+            document.getElementById("receipt-overlay").style.display = "none";
+        }
+
+        loadCart();
+    </script>
+
+    <style>
+        .pay-overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
+        }
+
+        .step-card { max-height: 92vh; overflow-y: auto; }
+
+        .pay-card {
+            background: white; border-radius: 14px;
+            padding: 24px; width: 360px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            box-sizing: border-box;
+        }
+
+        .step-indicator {
+            display: flex; align-items: center;
+            justify-content: center; margin-bottom: 20px;
+        }
+
+        .step {
+            display: flex; flex-direction: column; align-items: center;
+            font-size: 13px; font-weight: bold; color: #bbb;
+            background: #eee; border-radius: 50%;
+            width: 34px; height: 34px; justify-content: center;
+            position: relative; flex-shrink: 0;
+        }
+
+        .step span {
+            position: absolute; bottom: -18px;
+            font-size: 10px; white-space: nowrap;
+            font-weight: normal; color: #aaa;
+        }
+
+        .step.active { background: orange; color: white; }
+        .step.active span { color: orange; font-weight: bold; }
+        .step.done { background: #4caf50; color: white; }
+        .step.done span { color: #4caf50; }
+
+        .step-line {
+            flex: 1; height: 2px; background: #eee;
+            margin: 0 4px; margin-bottom: 18px;
+        }
+
+        .active-line { background: orange; }
+
+        .delivery-option {
+            display: flex; align-items: center; gap: 12px;
+            padding: 13px 14px; border: 2px solid #e0e0e0;
+            border-radius: 10px; cursor: pointer;
+            margin-bottom: 8px; transition: 0.2s;
+        }
+
+        .delivery-option:hover { background: #fff8f0; }
+        .delivery-option.selected { border-color: orange; background: #fff5e0; }
+        .delivery-icon { font-size: 22px; }
+
+        .delivery-info {
+            flex: 1; display: flex; flex-direction: column; font-size: 14px;
+        }
+
+        .delivery-info strong { font-size: 15px; }
+        .delivery-info span { color: #555; font-size: 13px; }
+
+        .delivery-badge {
+            background: #f0f0f0; border: 1px solid #ccc;
+            border-radius: 20px; padding: 3px 10px;
+            font-size: 13px; font-weight: bold; color: #333;
+        }
+
+        .delivery-check { color: orange; font-weight: bold; font-size: 18px; }
+        .delivery-check.hidden { visibility: hidden; }
+
+        .address-box { border: 1px solid #e0e0e0; border-radius: 10px; padding: 14px; }
+
+        .address-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+
+        .address-icon { font-size: 22px; margin-top: 4px; }
+        .address-text { flex: 1; }
+
+        .gps-btn {
+            width: 100%; padding: 10px; background: #333;
+            color: white; border: none; border-radius: 8px;
+            font-size: 14px; cursor: pointer; transition: 0.2s; display: block;
+        }
+
+        .gps-btn:hover { background: orange; }
+
+        .pay-header {
+            display: flex; justify-content: space-between;
+            align-items: center; font-weight: bold;
+            font-size: 15px; margin-bottom: 16px; color: #333;
+        }
+
+        .cancel-btn {
+            background: #ddd !important; color: #333 !important;
+            border: none; padding: 6px 14px; border-radius: 6px;
+            cursor: pointer; font-size: 13px; width: auto !important;
+        }
+
+        .cancel-btn:hover { background: #bbb !important; }
+
+        .pay-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+        .pay-option {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px; border: 1px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; font-size: 15px;
+            transition: 0.2s; user-select: none;
+        }
+
+        .pay-option:hover { background: #f9f9f9; }
+        .pay-option.selected { background: #fff5e0; border-color: orange; }
+
+        .pay-option input[type="radio"] {
+            width: 17px; height: 17px;
+            accent-color: orange; pointer-events: none;
+        }
+
+        .pay-fields { margin-bottom: 14px; }
+        .pay-fields select:focus { border-color: orange; }
+
+        .proceed-btn {
+            width: 100%; padding: 13px; background-color: #ccc;
+            color: white; font-size: 16px; font-weight: bold;
+            border: none; border-radius: 8px; transition: 0.3s; cursor: pointer;
+        }
+
+        .proceed-btn:not([disabled]):hover { filter: brightness(0.88); }
+
+        /* QR */
+        .qr-card {
+            background: white; border-radius: 16px; width: 340px;
+            overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+            box-sizing: border-box;
+        }
+
+        .qr-header { padding: 22px 20px 18px; text-align: center; background: #1a8cff; transition: background 0.3s; }
+        .qr-title { font-size: 30px; font-weight: 900; color: white; margin-bottom: 4px; }
+
+        .qr-scan-text {
+            color: white; font-size: 14px; font-weight: 800;
+            letter-spacing: 2px; margin: 0;
+            position: static !important; width: auto !important; left: auto !important; top: auto !important;
+        }
+
+        .qr-body { padding: 18px 24px 10px; text-align: center; }
+
+        .qr-merchant {
+            font-weight: bold; font-size: 16px; color: #222; margin: 0 0 12px;
+            position: static !important; width: auto !important; left: auto !important; top: auto !important;
+        }
+
+        .qr-img { width: 210px; height: 210px; object-fit: contain; border-radius: 6px; display: block; margin: 0 auto; }
+
+        .qr-total {
+            font-size: 20px; font-weight: bold; color: #222; margin: 12px 0 6px;
+            position: static !important; width: auto !important; left: auto !important; top: auto !important;
+        }
+
+        .qr-instruction {
+            font-size: 12px; color: #888; margin: 0 0 14px;
+            position: static !important; width: auto !important; left: auto !important; top: auto !important;
+        }
+
+        .qr-btn-row { display: flex; gap: 10px; padding: 0 16px 18px; }
+
+        .qr-back-btn {
+            flex: 1; padding: 13px; background: #e0e0e0; color: #333;
+            font-size: 15px; font-weight: bold; border: none;
+            border-radius: 10px; cursor: pointer; transition: 0.2s;
+        }
+
+        .qr-back-btn:hover { background: #c8c8c8; }
+
+        .qr-paid-btn {
+            flex: 1.5; padding: 13px; background: orange; color: white;
+            font-size: 15px; font-weight: bold; border: none;
+            border-radius: 10px; cursor: pointer; transition: 0.2s;
+        }
+
+        .qr-paid-btn:hover { background: #cc7000; }
+
+        /* Receipt */
+        .receipt-card {
+            background: white; border-radius: 14px; padding: 24px;
+            width: 340px; max-height: 92vh; overflow-y: auto;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            text-align: center; box-sizing: border-box;
+        }
+
+        .receipt-header .receipt-logo { width: 65px; margin-bottom: 6px; }
+        .receipt-header h2 { color: red; margin: 0; font-size: 20px; }
+
+        .receipt-sub {
+            color: #888; font-size: 13px; margin: 2px 0 10px; position: static !important;
+        }
+
+        .receipt-item {
+            display: flex; justify-content: space-between;
+            padding: 6px 0; font-size: 14px; text-align: left;
+        }
+
+        .total-row { font-size: 16px; padding: 8px 0; }
+        .tx-row { font-size: 12px; color: #888; padding: 4px 0 8px; }
+
+        .tx-code {
+            font-family: monospace; font-size: 12px;
+            color: orange; font-weight: bold; letter-spacing: 1px;
+        }
+
+        .receipt-info {
+            font-size: 13px; text-align: left; margin: 5px 0;
+            color: #444; position: static !important;
+        }
+
+        .receipt-thank {
+            font-size: 15px; font-weight: bold; color: orange;
+            margin: 14px 0 10px; position: static !important;
+        }
+
+        .close-receipt-btn {
+            width: 100%; padding: 11px; background: orange; color: white;
+            font-size: 15px; font-weight: bold; border: none; border-radius: 8px;
+            cursor: pointer; transition: 0.2s; box-sizing: border-box; display: block;
+        }
+
+        .close-receipt-btn:hover { background: red; }
+
+        hr { border: none; border-top: 1px dashed #ccc; margin: 10px 0; }
+
+        .track-btn {
+            width: 100%; padding: 11px; background: #333; color: white;
+            font-size: 15px; font-weight: bold; border: none; border-radius: 8px;
+            cursor: pointer; transition: 0.2s; margin-bottom: 8px;
+            box-sizing: border-box; display: block;
+        }
+
+        .track-btn:hover { background: orange; }
+
+        /* ═══════════════════════════
+           TRACKING CARD
+        ═══════════════════════════ */
+        .tracking-card {
+            background: white; border-radius: 20px;
+            width: 360px; max-height: 92vh; overflow-y: auto;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            box-sizing: border-box; padding-bottom: 20px;
+        }
+
+        .tracking-top { padding: 22px 24px 0; text-align: center; }
+
+        .tracking-title { font-size: 17px; font-weight: 900; color: #111; letter-spacing: 1.5px; }
+
+        .tracking-eta { text-align: center; padding: 14px 24px 0; }
+
+        .eta-label {
+            font-size: 14px; color: #888; margin: 0 0 4px;
+            position: static !important; width: auto !important;
+        }
+
+        .eta-time {
+            font-size: 34px; font-weight: 900; color: #111; margin: 0;
+            transition: color 0.4s;
+            position: static !important; width: auto !important;
+        }
+
+        .tracking-illustration {
+            display: flex; justify-content: center; align-items: center;
+            margin: 16px 24px 0; border-radius: 20px;
+            height: 140px; background: #fff0f5; transition: background 0.5s;
+        }
+
+        .track-icon {
+            font-size: 76px;
+            animation: iconBounce 1.6s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes iconBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Progress bars */
+        .track-progress { display: flex; gap: 6px; padding: 16px 24px 0; }
+
+        .track-bar {
+            flex: 1; height: 6px; background: #e0e0e0;
+            border-radius: 10px; overflow: hidden; position: relative;
+        }
+
+        .track-bar.bar-done { background: orange; }
+
+        .track-bar.bar-active::after {
+            content: '';
+            position: absolute; top: 0; left: -60%;
+            width: 60%; height: 100%;
+            background: orange; border-radius: 10px;
+            animation: barSlide 1.2s ease-in-out infinite;
+        }
+
+        @keyframes barSlide {
+            0% { left: -60%; }
+            100% { left: 140%; }
+        }
+
+        .track-status-text {
+            font-size: 14px; color: #333; text-align: center;
+            padding: 14px 24px 0; margin: 0; font-weight: 500; line-height: 1.6;
+            position: static !important; width: auto !important;
+        }
+
+        .track-address-box {
+            margin: 14px 24px 0; border: 1px solid #eee;
+            border-radius: 12px; padding: 12px 14px; background: #fafafa;
+        }
+
+        .track-address-title { font-size: 13px; font-weight: bold; color: #333; margin-bottom: 6px; }
+
+        .track-address-text {
+            font-size: 13px; color: #555; margin: 0;
+            position: static !important; width: auto !important;
+        }
+
+        .track-note-text {
+            font-size: 12px; color: #888; margin: 4px 0 0;
+            position: static !important; width: auto !important;
+        }
+
+        .close-track-btn {
+            display: block; width: calc(100% - 48px);
+            margin: 16px 24px 0; padding: 12px;
+            background: orange; color: white;
+            font-size: 15px; font-weight: bold;
+            border: none; border-radius: 10px;
+            cursor: pointer; transition: 0.2s; box-sizing: border-box;
+        }
+
+        .close-track-btn:hover { background: red; }
+    </style>
+</body>
+</html>
