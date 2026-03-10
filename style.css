@@ -265,9 +265,9 @@ nav a.cart {
     margin: 0;
 }
 
-/* Stars within each card — tall enough to match the 25%OFF heading */
+/* Stars within each card */
 .ratings-star {
-    height: 22px;
+    height: 50px;
     width: auto;
     display: block;
     margin: 4px auto 0;

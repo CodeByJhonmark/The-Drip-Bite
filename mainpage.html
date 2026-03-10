@@ -83,7 +83,7 @@
                                 <i class="fa-solid fa-receipt"></i> Order History
                             </button>
                             <button class="dropdown-item" onclick="openModal('savedaddress-modal')">
-                                <i class="fa-solid fa-location-dot"></i> Saved Addresses
+                                <i class="fa-solid fa-location-dot"></i> Saved Address
                             </button>
                             <hr class="dropdown-divider">
                             <button class="dropdown-item dropdown-logout" onclick="logout()">
@@ -343,9 +343,13 @@
     <div class="modal-overlay" id="savedaddress-modal">
         <div class="modal-card">
             <button class="modal-close" onclick="closeModal('savedaddress-modal')"><i class="fa-solid fa-xmark"></i></button>
-            <h2><i class="fa-solid fa-location-dot"></i> Saved Addresses</h2>
+            <h2><i class="fa-solid fa-location-dot"></i> Saved Address</h2>
             <div id="saved-address-list"></div>
             <div class="add-address-form">
+                <button class="gps-addr-btn" onclick="useGPSForAddress()">
+                    <i class="fa-solid fa-location-crosshairs"></i> Use Current Location
+                </button>
+                <p id="addr-gps-status" style="font-size:12px;color:#888;margin:-4px 0 0;text-align:center;min-height:16px;"></p>
                 <input type="text" id="new-addr-label" placeholder="Label (e.g. Home, Office)">
                 <input type="text" id="new-addr-street" placeholder="Street / Barangay">
                 <input type="text" id="new-addr-city" placeholder="City / Province">
@@ -549,6 +553,49 @@
         showToast('Address saved!');
     }
 
+    function useGPSForAddress() {
+        var status = document.getElementById('addr-gps-status');
+        if (!navigator.geolocation) {
+            status.style.color = 'red';
+            status.textContent = 'Geolocation not supported by your browser.';
+            return;
+        }
+        status.style.color = '#888';
+        status.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Detecting location...';
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                var lat = pos.coords.latitude, lng = pos.coords.longitude;
+                fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json', {
+                    headers: { 'Accept-Language': 'en', 'User-Agent': 'TheDripBiteApp/1.0' }
+                })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    var addr = data.address || {};
+                    document.getElementById('new-addr-label').value = 'Current Location';
+                    document.getElementById('new-addr-street').value = [addr.road, addr.suburb, addr.neighbourhood].filter(Boolean).join(', ') || '';
+                    document.getElementById('new-addr-city').value = [addr.city||addr.town||addr.municipality, addr.state].filter(Boolean).join(', ') || '';
+                    status.style.color = '#2e7d32';
+                    status.innerHTML = '<i class="fa-solid fa-circle-check"></i> Location detected! Review and save.';
+                })
+                .catch(function(){
+                    document.getElementById('new-addr-label').value = 'Current Location';
+                    document.getElementById('new-addr-street').value = 'GPS: ' + lat.toFixed(5) + ', ' + lng.toFixed(5);
+                    document.getElementById('new-addr-city').value = 'Philippines';
+                    status.style.color = '#2e7d32';
+                    status.innerHTML = '<i class="fa-solid fa-circle-check"></i> GPS located!';
+                });
+            },
+            function(err) {
+                status.style.color = 'red';
+                if (err.code === err.PERMISSION_DENIED)
+                    status.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Location access denied. Please enter manually.';
+                else
+                    status.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Could not get location. Please enter manually.';
+            },
+            { timeout: 10000, enableHighAccuracy: true }
+        );
+    }
+
     function deleteAddress(index) {
         var addresses = JSON.parse(localStorage.getItem('dripbite_addresses') || '[]');
         addresses.splice(index, 1);
@@ -729,11 +776,13 @@
     .add-address-form { border-top:1px solid #eee; padding-top:14px; margin-top:6px; display:flex; flex-direction:column; gap:8px; }
     .add-address-form input { width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:8px; font-size:13px; outline:none; box-sizing:border-box; }
     .add-address-form input:focus { border-color:orange; }
+    .gps-addr-btn { width:100%; padding:9px 12px; background:#333; color:white; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:0.2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .gps-addr-btn:hover { background:orange; }
 
     /* ── BEST SELLER BUTTONS ── */
     .bs-btn { background:none; border:none; cursor:pointer; padding:0; text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:4px; }
     .bs-btn:hover { background:rgba(255,255,255,0.3); border-radius:8px; }
-    .bs-btn .ratings-star { height:26px; width:auto; display:block; margin:2px auto 0; }
+    .bs-btn .ratings-star { height:50px; width:auto; display:block; margin:4px auto 0; }
 </style> 
 </body>
 </html>
