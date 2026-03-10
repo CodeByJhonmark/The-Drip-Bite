@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>The Drip Bite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="sign.css">
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="form-container sign-in">
+            <form id="login-form">
+                <h1>Login</h1>
+                <input type="text" placeholder="Username" required id="username">
+                <input type="password" placeholder="Password" required id="password">
+                <!-- FIX: "Forgot password?" now shows the reset section instead of doing nothing -->
+                <a href="#" onclick="showForgotPassword(); return false;">Forgot password?</a>
+                <button id="login-btn">Login</button>
+                <p>or login with social platforms</p>
+                <div class="social-icons">
+                    <a href="#"><img src="assets/googe.png" alt="Google"></a>
+                    <a href="#"><img src="assets/fbb.png" alt="Facebook"></a>
+                </div>
+            </form>
+        </div>
+        <div class="form-container sign-up">
+            <form id="signup-form">
+                <h1>Registration</h1>
+                <input type="text" placeholder="Username" required id="signup-username">
+                <input type="email" placeholder="Email" required id="email">
+                <input type="password" placeholder="Password" required id="signup-password">
+                <button id="register-btn">Register</button>
+                <p>or register with social platforms</p>
+                <div class="social-icons">
+                    <a href="#"><img src="assets/googe.png" alt="Google"></a>
+                    <a href="#"><img src="assets/fbb.png" alt="Facebook"></a>
+                </div>
+            </form>
+        </div>
+        <div class="toggle-container" id="toggle-container">
+            <img class="logo" src="assets/LOGO.png" alt="">
+            <h1 id="toggle-title">Hello, Welcome To The Drip Bite!</h1>
+            <p id="toggle-text">Don't have an account?</p>
+            <button class="toggle-button" id="register">Register</button>
+        </div>
+    </div>
+
+    <!-- FORGOT PASSWORD OVERLAY -->
+    <!-- FIX: Added a simple reset-by-username form so "Forgot password?" is functional -->
+    <div id="forgot-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:16px; padding:30px 28px; width:340px; box-shadow:0 8px 30px rgba(0,0,0,0.25); box-sizing:border-box; position:relative;">
+            <button onclick="hideForgotPassword()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;width:auto;padding:4px;">✕</button>
+            <h2 style="margin:0 0 18px; font-size:18px; color:#333;">Reset Password</h2>
+            <p style="font-size:13px; color:#777; margin:0 0 14px;">Enter your username and a new password.</p>
+            <input type="text" id="reset-username" placeholder="Username" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:10px;">
+            <input type="password" id="reset-newpw" placeholder="New Password" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:10px;">
+            <input type="password" id="reset-confirmpw" placeholder="Confirm New Password" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:4px;">
+            <p id="reset-msg" style="font-size:13px; min-height:18px; margin:0 0 12px;"></p>
+            <button onclick="submitForgotPassword()" style="width:100%;padding:11px;background:orange;color:white;font-size:15px;font-weight:bold;border:none;border-radius:8px;cursor:pointer;">Reset Password</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // FIX: Redirect to mainpage if already logged in
+        (function() {
+            if (localStorage.getItem('user')) {
+                window.location.href = 'mainpage.html';
+            }
+        })();
+
+        function showForgotPassword() {
+            document.getElementById('reset-username').value = '';
+            document.getElementById('reset-newpw').value = '';
+            document.getElementById('reset-confirmpw').value = '';
+            document.getElementById('reset-msg').textContent = '';
+            document.getElementById('forgot-overlay').style.display = 'flex';
+        }
+
+        function hideForgotPassword() {
+            document.getElementById('forgot-overlay').style.display = 'none';
+        }
+
+        function submitForgotPassword() {
+            var username = document.getElementById('reset-username').value.trim();
+            var newPw = document.getElementById('reset-newpw').value;
+            var confirmPw = document.getElementById('reset-confirmpw').value;
+            var msg = document.getElementById('reset-msg');
+
+            if (!username) { msg.style.color = 'red'; msg.textContent = 'Please enter your username.'; return; }
+            var stored = localStorage.getItem(username);
+            if (!stored) { msg.style.color = 'red'; msg.textContent = 'Username not found.'; return; }
+            if (newPw.length < 6) { msg.style.color = 'red'; msg.textContent = 'Password must be at least 6 characters.'; return; }
+            if (newPw !== confirmPw) { msg.style.color = 'red'; msg.textContent = 'Passwords do not match.'; return; }
+
+            var user = JSON.parse(stored);
+            user.password = newPw;
+            localStorage.setItem(username, JSON.stringify(user));
+            // Also update active session if this is the logged-in user
+            var activeUser = JSON.parse(localStorage.getItem('user') || '{}');
+            if (activeUser.username === username) {
+                localStorage.setItem('user', JSON.stringify(user));
+            }
+            msg.style.color = 'green';
+            msg.textContent = 'Password reset! You can now log in.';
+            setTimeout(hideForgotPassword, 1800);
+        }
+    </script>
+</body>
+</html>
