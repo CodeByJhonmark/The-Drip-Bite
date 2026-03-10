@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <title>The Drip Bite</title> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="style2.css"> 
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script> 
+</head> 
+<body> 
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container"></div>
+
+    <div class="loader"> 
+        <div class="truckWrapper"> 
+        <div class="truckBody"> 
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 198 93" class="trucksvg"> 
+            <path stroke-width="3" stroke="#282828" fill="#F83D3D" d="M135 22.5H177.264C178.295 22.5 179.22 23.133 179.594 24.0939L192.33 56.8443C192.442 57.1332 192.5 57.4404 192.5 57.7504V89C192.5 90.3807 191.381 91.5 190 91.5H135C133.619 91.5 132.5 90.3807 132.5 89V25C132.5 23.6193 133.619 22.5 135 22.5Z"></path> 
+            <path stroke-width="3" stroke="#282828" fill="#7D7C7C" d="M146 33.5H181.741C182.779 33.5 183.709 34.1415 184.078 35.112L190.538 52.112C191.16 53.748 189.951 55.5 188.201 55.5H146C144.619 55.5 143.5 54.3807 143.5 53V36C143.5 34.6193 144.619 33.5 146 33.5Z"></path> 
+            <path stroke-width="2" stroke="#282828" fill="#282828" d="M150 65C150 65.39 149.763 65.8656 149.127 66.2893C148.499 66.7083 147.573 67 146.5 67C145.427 67 144.501 66.7083 143.873 66.2893C143.237 65.8656 143 65.39 143 65C143 64.61 143.237 64.1344 143.873 63.7107C144.501 63.2917 145.427 63 146.5 63C147.573 63 148.499 63.2917 149.127 63.7107C149.763 64.1344 150 64.61 150 65Z"></path> 
+            <rect stroke-width="2" stroke="#282828" fill="#FFFCAB" rx="1" height="7" width="5" y="63" x="187"></rect> 
+            <rect stroke-width="2" stroke="#282828" fill="#282828" rx="1" height="11" width="4" y="81" x="193"></rect> 
+            <rect stroke-width="3" stroke="#282828" fill="#DFDFDF" rx="2.5" height="90" width="121" y="1.5" x="6.5"></rect> 
+            <rect stroke-width="2" stroke="#282828" fill="#DFDFDF" rx="2" height="4" width="6" y="84" x="1"></rect> 
+            </svg> 
+        </div> 
+        <div class="truckTires"> 
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 30 30" class="tiresvg"> 
+            <circle stroke-width="3" stroke="#282828" fill="#282828" r="13.5" cy="15" cx="15"></circle> 
+            <circle fill="#DFDFDF" r="7" cy="15" cx="15"></circle> 
+            </svg> 
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 30 30" class="tiresvg"> 
+            <circle stroke-width="3" stroke="#282828" fill="#282828" r="13.5" cy="15" cx="15"></circle> 
+            <circle fill="#DFDFDF" r="7" cy="15" cx="15"></circle> 
+            </svg> 
+        </div> 
+        <div class="road"></div> 
+        <svg xml:space="preserve" viewBox="0 0 453.459 453.459" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" id="Capa_1" version="1.1" fill="#000000" class="lampPost"> 
+            <path d="M252.882,0c-37.781,0-68.686,29.953-70.245,67.358h-6.917v8.954c-26.109,2.163-45.463,10.011-45.463,19.366h9.993 c-1.65,5.146-2.507,10.54-2.507,16.017c0,28.956,23.558,52.514,52.514,52.514c28.956,0,52.514-23.558,52.514-52.514 c0-5.478-0.856-10.872-2.506-16.017h9.992c0-9.354-19.352-17.204-45.463-19.366v-8.954h-6.149C200.189,38.779,223.924,16,252.882,16 c29.952,0,54.32,24.368,54.32,54.32c0,28.774-11.078,37.009-25.105,47.437c-17.444,12.968-37.216,27.667-37.216,78.884v113.914 h-0.797c-5.068,0-9.174,4.108-9.174,9.177c0,2.844,1.293,5.383,3.321,7.066c-3.432,27.933-26.851,95.744-8.226,115.459v11.202h45.75 v-11.202c18.625-19.715-4.794-87.527-8.227-115.459c2.029-1.683,3.322-4.223,3.322-7.066c0-5.068-4.107-9.177-9.176-9.177h-0.795 V196.641c0-43.174,14.942-54.283,30.762-66.043c14.793-10.997,31.559-23.461,31.559-60.277C323.202,31.545,291.656,0,252.882,0z M232.77,111.694c0,23.442-19.071,42.514-42.514,42.514c-23.442,0-42.514-19.072-42.514-42.514c0-5.531,1.078-10.957,3.141-16.017 h78.747C231.693,100.736,232.77,106.162,232.77,111.694z"></path> 
+        </svg> 
+        </div> 
+    </div> 
+
+    <div class="wholepage"> 
+        <header> 
+            <nav> 
+                <img src="assets/LOGO.png" alt="The Drip Bite Logo" class="logo"> 
+                <h1>THE DRIP BITE!</h1> 
+                <a href="#home" class="active">Home</a> 
+                <a href="#menu">Menu</a> 
+                <a href="#contact">Contact</a>  
+                <a href="cart.html" class="cart"><box-icon name='cart'></box-icon></a>
+
+                <!-- USER ACCOUNT DROPDOWN -->
+                <div class="user-account-wrapper" id="user-account-wrapper">
+                    <button class="user-account-btn" id="user-account-btn" onclick="toggleUserDropdown()">
+                        <i class="fa-solid fa-circle-user"></i>
+                        <span id="nav-username">Account</span>
+                        <i class="fa-solid fa-chevron-down" id="chevron-icon"></i>
+                    </button>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <div class="dropdown-header">
+                            <i class="fa-solid fa-circle-user dropdown-avatar"></i>
+                            <span id="dropdown-username">User</span>
+                        </div>
+                        <hr class="dropdown-divider">
+                        <button class="dropdown-item" onclick="openModal('profile-modal')">
+                            <i class="fa-solid fa-user"></i> Profile
+                        </button>
+                        <button class="dropdown-item" onclick="openModal('forgotpw-modal')">
+                            <i class="fa-solid fa-key"></i> Change Password
+                        </button>
+                        <button class="dropdown-item" onclick="openModal('orderhistory-modal')">
+                            <i class="fa-solid fa-receipt"></i> Order History
+                        </button>
+                        <button class="dropdown-item" onclick="openModal('savedaddress-modal')">
+                            <i class="fa-solid fa-location-dot"></i> Saved Addresses
+                        </button>
+                        <hr class="dropdown-divider">
+                        <button class="dropdown-item dropdown-logout" onclick="logout()">
+                            <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                        </button>
+                    </div>
+                </div>
+            </nav> 
+        </header> 
+
+        <section id="home"> 
+            <img src="assets/LOGO.png" alt="" class="logo2"> 
+            <div class="text"> 
+                <h1>Welcome to The Drip Bite</h1> 
+                <p>Welcome to your ultimate destination for all things delicious!, Whether you're craving a quick snack or a full meal, we've got something to satisfy every appetite. Come and experience the perfect blend of taste, quality, and satisfaction in every bite!</p> 
+            </div> 
+            <div class="card-home"> 
+                <h1>BEST SELLER</h1> 
+                <div class="bestseller2"> 
+                    <h2>25%OFF</h2> 
+                    <a href="#menu"> 
+                        <img src="assets/chicken salad.png" alt="Chicken Salad" class="food-image"> 
+                        <p>Chicken Salad</p> 
+                        <p><b>₱ 600</b></p> 
+                    </a> 
+                </div> 
+                <img src="assets/5star.png" alt="" class="ratings1"> 
+                <div class="bestseller1"> 
+                    <h2>15%OFF</h2> 
+                    <a href="#menu"> 
+                        <img src="assets/sushi rolls.png" alt="Sushi Rolls" class="food-image"> 
+                        <p>Sushi Rolls</p> 
+                        <p><b>₱ 750</b></p> 
+                    </a> 
+                </div> 
+                <img src="assets/5star.png" alt="" class="ratings2"> 
+            </div> 
+        </section> 
+
+        <section id="menu"> 
+            <h2 class="menu">Our Menu</h2>
+
+            <!-- CATEGORY FILTER + SEARCH BAR -->
+            <div class="menu-controls">
+                <div class="category-filters">
+                    <button class="cat-btn active" onclick="filterMenu('all', this)">All</button>
+                    <button class="cat-btn" onclick="filterMenu('food', this)">🍔 Food</button>
+                    <button class="cat-btn" onclick="filterMenu('drinks', this)">🥤 Drinks</button>
+                    <button class="cat-btn" onclick="filterMenu('snacks', this)">🍟 Snacks</button>
+                </div>
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="menu-search" placeholder="Search menu..." oninput="searchMenu(this.value)">
+                </div>
+            </div>
+
+            <p id="no-results" style="display:none; color:#999; margin-top:20px; font-size:16px;">No items found.</p>
+
+            <div class="menu-items"> 
+                <div class="item" data-category="food"> 
+                    <button class="open-btn" data-name="Juicy Burger" data-price="100"> 
+                        <img src="assets/burger.png" alt="Juicy Burger" class="food-image"> 
+                        <p>Juicy Burgers</p> 
+                        <p><b>₱ 100</b></p> 
+                    </button> 
+                </div> 
+                <div class="item" data-category="food"> 
+                    <button class="open-btn" data-name="Cheesy Pizza" data-price="300"> 
+                        <img src="assets/pizza.png" alt="Cheesy Pizza" class="food-image"> 
+                        <p>Cheesy Pizza</p> 
+                        <p><b>₱ 300</b></p> 
+                    </button>           
+                </div> 
+                <div class="item" data-category="food"> 
+                    <button class="open-btn" data-name="Roasted Chicken" data-price="399"> 
+                        <img src="assets/roastChicken.png" alt="Roasted Chicken" class="food-image"> 
+                        <p>Roasted Chicken</p> 
+                        <p><b>₱ 399</b></p> 
+                    </button> 
+                </div> 
+                <div class="item" data-category="snacks"> 
+                    <button class="open-btn" data-name="Crispy Fries" data-price="100"> 
+                        <img src="assets/fries.png" alt="Fries" class="food-image"> 
+                        <p>Crispy Fries</p> 
+                        <p><b>₱ 100</b></p>   
+                    </button> 
+                </div> 
+                <div class="item" data-category="food"> 
+                    <button class="open-btn" data-name="Hotdog Sandwiches" data-price="120"> 
+                        <img src="assets/hotdogsandwich.png" alt="Hotdog Sandwich" class="food-image"> 
+                        <p>Hotdog Sandwich</p> 
+                        <p><b>₱ 120</b></p> 
+                    </button> 
+                </div> 
+                <div class="item" data-category="drinks"> 
+                    <button class="open-btn" data-name="Lemonade" data-price="70"> 
+                        <img src="assets/lemonade.png" alt="Lemonade" class="food-image"> 
+                        <p>Lemonade</p> 
+                        <p><b>₱ 70</b></p> 
+                    </button> 
+                </div> 
+                <div class="item" data-category="drinks"> 
+                    <button class="open-btn" data-name="Fruit Shake" data-price="80"> 
+                        <img src="assets/fruit juice.png" alt="Fruit Shake" class="food-image"> 
+                        <p>Fruit Shake</p> 
+                        <p><b>₱ 80</b></p> 
+                    </button>           
+                </div> 
+                <div class="item" data-category="drinks"> 
+                    <button class="open-btn" data-name="Bubble Tea" data-price="100"> 
+                        <img src="assets/milktea.png" alt="Bubble Tea" class="food-image"> 
+                        <p>Bubble Tea</p> 
+                        <p><b>₱ 100</b></p> 
+                    </button> 
+                </div> 
+                <div class="item" data-category="drinks"> 
+                    <button class="open-btn" data-name="Iced Coffee" data-price="80"> 
+                        <img src="assets/iced coffee.png" alt="Iced Coffee" class="food-image"> 
+                        <p>Iced Coffee</p> 
+                        <p><b>₱ 80</b></p> 
+                    </button> 
+                </div> 
+                <div class="item" data-category="drinks"> 
+                    <button class="open-btn" data-name="Coffee Latte" data-price="100"> 
+                        <img src="assets/coffee latte.png" alt="Coffee Latte" class="food-image"> 
+                        <p>Coffee Latte</p> 
+                        <p><b>₱ 100</b></p> 
+                    </button> 
+                </div> 
+                <div class="item" data-category="food"> 
+                    <button class="open-btn" data-name="Burritos" data-price="170"> 
+                        <img src="assets/burritos.png" alt="Burritos" class="food-image"> 
+                        <p>Burritos</p> 
+                        <p><b>₱ 170</b></p> 
+                    </button> 
+                </div> 
+                <div class="item" data-category="snacks"> 
+                    <button class="open-btn" data-name="Mozzarella Stick" data-price="100"> 
+                        <img src="assets/mozarilla sticks.png" alt="Mozzarella Stick" class="food-image"> 
+                        <p>Mozzarella Stick</p> 
+                        <p><b>₱ 100</b></p> 
+                    </button>           
+                </div> 
+                <div class="item" data-category="snacks"> 
+                    <button class="open-btn" data-name="Nachos" data-price="80"> 
+                        <img src="assets/nachos.png" alt="Nachos" class="food-image"> 
+                        <p>Nachos</p> 
+                        <p><b>₱ 80</b></p> 
+                    </button> 
+                </div> 
+                <div class="item" data-category="food"> 
+                    <button class="open-btn" data-name="BBQ Ribs" data-price="599"> 
+                        <img src="assets/bbq ribs.png" alt="BBQ Ribs" class="food-image"> 
+                        <p>BBQ Ribs</p>  
+                        <p><b>₱ 599</b></p>  
+                    </button> 
+                </div> 
+                <div class="item" data-category="food"> 
+                    <button class="open-btn" data-name="Crispy Nuggets" data-price="199"> 
+                        <img src="assets/nuggets.png" alt="Crispy Nuggets" class="food-image"> 
+                        <p>Crispy Nuggets</p> 
+                        <p><b>₱ 199</b></p> 
+                    </button> 
+                </div> 
+            </div> 
+        </section> 
+
+        <section id="contact"> 
+            <h1>Contact Us On</h1> 
+            <div class="social-links"> 
+                <a href="https://facebook.com/thedripbite" target="_blank"><i class="fa-brands fa-facebook"></i> Facebook</a> 
+                <a href="https://instagram.com/thedripbite" target="_blank"><i class="fa-brands fa-instagram"></i> Instagram</a> 
+                <a href="https://twitter.com/thedripbite" target="_blank"><i class="fa-brands fa-twitter"></i> Twitter</a> 
+            </div> 
+            <div class="contact-container"> 
+                <div class="map-container"> 
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1930284.4350319514!2d120.5790083594518!3d14.599512391312961!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c8d0c456e5f1%3A0xa4a6f0e9c1a28a0!2sManila%2C%20Metro%20Manila%2C%20Philippines!5e0!3m2!1sen!2sph!4v1711368000000!5m2!1sen!2sph" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe> 
+                </div> 
+                <form id="contact-form"> 
+                    <h2>Fill up For Best Seller Menu</h2> 
+                    <input type="text" name="name" placeholder="Your Name" required> 
+                    <input type="email" name="email" placeholder="Your Email" required> 
+                    <textarea name="message" placeholder="Your Message" required></textarea> 
+                    <button type="submit">Send Message</button> 
+                </form> 
+            </div> 
+            <div class="operating-hours"> 
+                <h3>Operating Hours</h3> 
+                <p>Monday - Friday: 9 AM - 8 PM</p> 
+                <p>Saturday - Sunday: 10 AM - 10 PM</p> 
+            </div> 
+        </section> 
+
+        <footer> 
+            <p class="copyright">&copy; 2025 The Drip Bite. All rights reserved.</p> 
+            <p>Country: Philippines</p> 
+        </footer> 
+    </div>
+
+    <!-- ITEM POPUP (outside wholepage to avoid visibility inheritance) -->
+    <div class="overlay" id="overlay"> 
+        <div class="popup-card" onclick="event.stopPropagation()"> 
+            <button class="popup-close" onclick="closePopup()">✕</button>
+            <h3 id="product-title">Product Details</h3> 
+            <p id="product-price"></p>
+            <div class="popup-instructions">
+                <label for="item-instructions">Special Instructions <span style="color:#999;font-size:12px;">(optional)</span></label>
+                <textarea id="item-instructions" placeholder="e.g. No onions, extra sauce, less spicy..."></textarea>
+            </div>
+            <button class="add-cart">Add to Cart</button> 
+            <button class="buy-now">Buy Now</button> 
+        </div> 
+    </div>
+
+    <!-- PROFILE MODAL -->
+    <div class="modal-overlay" id="profile-modal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('profile-modal')">✕</button>
+            <h2><i class="fa-solid fa-user"></i> My Profile</h2>
+            <div class="profile-avatar"><i class="fa-solid fa-circle-user"></i></div>
+            <div class="modal-field"><label>Username</label><input type="text" id="profile-username" readonly></div>
+            <div class="modal-field"><label>Email</label><input type="email" id="profile-email" readonly></div>
+            <button class="modal-btn" onclick="enableProfileEdit()">Edit Profile</button>
+            <button class="modal-btn modal-btn-save" id="save-profile-btn" style="display:none;" onclick="saveProfile()">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- CHANGE PASSWORD MODAL -->
+    <div class="modal-overlay" id="forgotpw-modal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('forgotpw-modal')">✕</button>
+            <h2><i class="fa-solid fa-key"></i> Change Password</h2>
+            <div class="modal-field"><label>Current Password</label><input type="password" id="old-password" placeholder="Enter current password"></div>
+            <div class="modal-field"><label>New Password</label><input type="password" id="new-password" placeholder="Enter new password"></div>
+            <div class="modal-field"><label>Confirm New Password</label><input type="password" id="confirm-password" placeholder="Confirm new password"></div>
+            <button class="modal-btn modal-btn-save" onclick="changePassword()">Update Password</button>
+        </div>
+    </div>
+
+    <!-- ORDER HISTORY MODAL -->
+    <div class="modal-overlay" id="orderhistory-modal">
+        <div class="modal-card modal-card-wide">
+            <button class="modal-close" onclick="closeModal('orderhistory-modal')">✕</button>
+            <h2><i class="fa-solid fa-receipt"></i> Order History</h2>
+            <div id="order-history-list"></div>
+        </div>
+    </div>
+
+    <!-- SAVED ADDRESSES MODAL -->
+    <div class="modal-overlay" id="savedaddress-modal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('savedaddress-modal')">✕</button>
+            <h2><i class="fa-solid fa-location-dot"></i> Saved Addresses</h2>
+            <div id="saved-address-list"></div>
+            <div class="add-address-form">
+                <input type="text" id="new-addr-label" placeholder="Label (e.g. Home, Office)">
+                <input type="text" id="new-addr-street" placeholder="Street / Barangay">
+                <input type="text" id="new-addr-city" placeholder="City / Province">
+                <button class="modal-btn modal-btn-save" onclick="saveNewAddress()"><i class="fa-solid fa-plus"></i> Add Address</button>
+            </div>
+        </div>
+    </div>
+
+<script> 
+    // ── TOAST ────────────────────────────────────────────────────
+    function showToast(message, type) {
+        var type = type || 'success';
+        var container = document.getElementById('toast-container');
+        var toast = document.createElement('div');
+        toast.className = 'toast toast-' + type;
+        toast.innerHTML = (type === 'success' ? '✅ ' : type === 'error' ? '❌ ' : 'ℹ️ ') + message;
+        container.appendChild(toast);
+        setTimeout(function() { toast.classList.add('show'); }, 10);
+        setTimeout(function() {
+            toast.classList.remove('show');
+            setTimeout(function() { toast.remove(); }, 400);
+        }, 3000);
+    }
+
+    // ── USER ACCOUNT ─────────────────────────────────────────────
+    function loadUserNav() {
+        var user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.username) {
+            document.getElementById('nav-username').textContent = user.username;
+            document.getElementById('dropdown-username').textContent = user.username;
+        }
+    }
+
+    function toggleUserDropdown() {
+        var dd = document.getElementById('user-dropdown');
+        var chevron = document.getElementById('chevron-icon');
+        dd.classList.toggle('open');
+        chevron.style.transform = dd.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0)';
+    }
+
+    document.addEventListener('click', function(e) {
+        var wrapper = document.getElementById('user-account-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            document.getElementById('user-dropdown').classList.remove('open');
+            document.getElementById('chevron-icon').style.transform = 'rotate(0)';
+        }
+    });
+
+    // ── MODALS ───────────────────────────────────────────────────
+    function openModal(id) {
+        document.getElementById('user-dropdown').classList.remove('open');
+        if (id === 'profile-modal') loadProfileModal();
+        if (id === 'orderhistory-modal') loadOrderHistory();
+        if (id === 'savedaddress-modal') loadSavedAddresses();
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    // Close modal on backdrop click
+    document.querySelectorAll('.modal-overlay').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            if (e.target === el) closeModal(el.id);
+        });
+    });
+
+    // ── PROFILE ──────────────────────────────────────────────────
+    function loadProfileModal() {
+        var user = JSON.parse(localStorage.getItem('user') || '{}');
+        document.getElementById('profile-username').value = user.username || '';
+        document.getElementById('profile-email').value = user.email || '';
+        document.getElementById('profile-username').readOnly = true;
+        document.getElementById('profile-email').readOnly = true;
+        document.getElementById('save-profile-btn').style.display = 'none';
+    }
+
+    function enableProfileEdit() {
+        document.getElementById('profile-username').readOnly = false;
+        document.getElementById('profile-email').readOnly = false;
+        document.getElementById('profile-username').focus();
+        document.getElementById('save-profile-btn').style.display = 'block';
+    }
+
+    function saveProfile() {
+        var user = JSON.parse(localStorage.getItem('user') || '{}');
+        var newUsername = document.getElementById('profile-username').value.trim();
+        var newEmail = document.getElementById('profile-email').value.trim();
+        if (!newUsername || !newEmail) { showToast('Please fill in all fields.', 'error'); return; }
+        // Remove old key, save with new username
+        localStorage.removeItem(user.username);
+        user.username = newUsername;
+        user.email = newEmail;
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem(newUsername, JSON.stringify(user));
+        loadUserNav();
+        closeModal('profile-modal');
+        showToast('Profile updated successfully!');
+    }
+
+    // ── CHANGE PASSWORD ──────────────────────────────────────────
+    function changePassword() {
+        var user = JSON.parse(localStorage.getItem('user') || '{}');
+        var oldPw = document.getElementById('old-password').value;
+        var newPw = document.getElementById('new-password').value;
+        var confirmPw = document.getElementById('confirm-password').value;
+        if (oldPw !== user.password) { showToast('Current password is incorrect.', 'error'); return; }
+        if (newPw.length < 6) { showToast('New password must be at least 6 characters.', 'error'); return; }
+        if (newPw !== confirmPw) { showToast('Passwords do not match.', 'error'); return; }
+        user.password = newPw;
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem(user.username, JSON.stringify(user));
+        document.getElementById('old-password').value = '';
+        document.getElementById('new-password').value = '';
+        document.getElementById('confirm-password').value = '';
+        closeModal('forgotpw-modal');
+        showToast('Password changed successfully!');
+    }
+
+    // ── ORDER HISTORY ────────────────────────────────────────────
+    function loadOrderHistory() {
+        var list = document.getElementById('order-history-list');
+        var history = JSON.parse(localStorage.getItem('dripbite_order_history') || '[]');
+        if (history.length === 0) {
+            list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No orders yet.</p>';
+            return;
+        }
+        list.innerHTML = history.slice().reverse().map(function(order, i) {
+            var items = order.items.map(function(it) {
+                return '<span>' + it.name + ' x' + it.quantity + ' — ₱' + (it.price * it.quantity) + '</span>';
+            }).join('');
+            return '<div class="history-card">' +
+                '<div class="history-top"><strong>Order #' + order.code + '</strong><span class="history-date">' + order.date + '</span></div>' +
+                '<div class="history-items">' + items + '</div>' +
+                '<div class="history-bottom"><span>Total: <strong>₱' + order.total + '</strong></span><span class="history-method">' + order.method + '</span></div>' +
+                '</div>';
+        }).join('');
+    }
+
+    // ── SAVED ADDRESSES ──────────────────────────────────────────
+    function loadSavedAddresses() {
+        var list = document.getElementById('saved-address-list');
+        var addresses = JSON.parse(localStorage.getItem('dripbite_addresses') || '[]');
+        if (addresses.length === 0) {
+            list.innerHTML = '<p style="text-align:center;color:#999;padding:10px 0 16px;">No saved addresses yet.</p>';
+            return;
+        }
+        list.innerHTML = addresses.map(function(addr, i) {
+            return '<div class="addr-card">' +
+                '<div class="addr-info"><strong>' + addr.label + '</strong><span>' + addr.street + ', ' + addr.city + '</span></div>' +
+                '<button class="addr-delete" onclick="deleteAddress(' + i + ')">🗑</button>' +
+                '</div>';
+        }).join('');
+    }
+
+    function saveNewAddress() {
+        var label = document.getElementById('new-addr-label').value.trim();
+        var street = document.getElementById('new-addr-street').value.trim();
+        var city = document.getElementById('new-addr-city').value.trim();
+        if (!label || !street || !city) { showToast('Please fill in all address fields.', 'error'); return; }
+        var addresses = JSON.parse(localStorage.getItem('dripbite_addresses') || '[]');
+        addresses.push({ label: label, street: street, city: city });
+        localStorage.setItem('dripbite_addresses', JSON.stringify(addresses));
+        document.getElementById('new-addr-label').value = '';
+        document.getElementById('new-addr-street').value = '';
+        document.getElementById('new-addr-city').value = '';
+        loadSavedAddresses();
+        showToast('Address saved!');
+    }
+
+    function deleteAddress(index) {
+        var addresses = JSON.parse(localStorage.getItem('dripbite_addresses') || '[]');
+        addresses.splice(index, 1);
+        localStorage.setItem('dripbite_addresses', JSON.stringify(addresses));
+        loadSavedAddresses();
+        showToast('Address removed.', 'info');
+    }
+
+    // ── MENU FILTER + SEARCH ─────────────────────────────────────
+    function filterMenu(category, btn) {
+        document.querySelectorAll('.cat-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var searchVal = document.getElementById('menu-search').value.toLowerCase();
+        applyMenuFilters(category, searchVal);
+    }
+
+    function searchMenu(val) {
+        var activeCat = document.querySelector('.cat-btn.active');
+        var category = activeCat ? activeCat.getAttribute('onclick').match(/'([^']+)'/)[1] : 'all';
+        applyMenuFilters(category, val.toLowerCase());
+    }
+
+    function applyMenuFilters(category, search) {
+        var items = document.querySelectorAll('.menu-items .item');
+        var anyVisible = false;
+        items.forEach(function(item) {
+            var itemCat = item.getAttribute('data-category');
+            var name = item.querySelector('p') ? item.querySelector('p').textContent.toLowerCase() : '';
+            var catMatch = (category === 'all' || itemCat === category);
+            var searchMatch = (!search || name.includes(search));
+            if (catMatch && searchMatch) {
+                item.style.display = '';
+                anyVisible = true;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        document.getElementById('no-results').style.display = anyVisible ? 'none' : 'block';
+    }
+
+    // ── ITEM POPUP ───────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        loadUserNav();
+
+        var selectedProduct = {};
+
+        function openPopup(button) { 
+            var name = button.getAttribute('data-name'); 
+            var price = button.getAttribute('data-price'); 
+            selectedProduct = { name: name, price: price };
+            document.getElementById('product-title').innerText = name; 
+            document.getElementById('product-price').innerText = '₱ ' + price; 
+            document.getElementById('item-instructions').value = '';
+            document.getElementById('overlay').style.display = 'flex'; 
+        }
+
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none';
+        }
+        window.closePopup = closePopup;
+
+        function addToCartAndRedirect(redirect) { 
+            var cart = JSON.parse(localStorage.getItem('cart')) || [];
+            var instructions = document.getElementById('item-instructions').value.trim();
+            var existingIndex = cart.findIndex(function(item) {
+                return item.name === selectedProduct.name && item.instructions === instructions;
+            });
+            if (existingIndex !== -1) {
+                cart[existingIndex].quantity += 1;
+            } else {
+                cart.push({
+                    name: selectedProduct.name,
+                    price: selectedProduct.price,
+                    quantity: 1,
+                    instructions: instructions
+                });
+            }
+            localStorage.setItem('cart', JSON.stringify(cart)); 
+            document.getElementById('overlay').style.display = 'none';
+            if (redirect) { 
+                window.location.href = 'cart.html';
+            } else {
+                showToast(selectedProduct.name + ' added to cart! 🛒');
+            }
+        }
+
+        document.querySelectorAll('.open-btn').forEach(function(button) { 
+            button.addEventListener('click', function() { openPopup(this); }); 
+        });
+        document.querySelector('.add-cart').addEventListener('click', function() { addToCartAndRedirect(false); }); 
+        document.querySelector('.buy-now').addEventListener('click', function() { addToCartAndRedirect(true); }); 
+        document.getElementById('overlay').addEventListener('click', function(e) { 
+            if (e.target.id === 'overlay') closePopup();
+        }); 
+
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showToast('Message sent! We\'ll get back to you soon.');
+            this.reset();
+        });
+    });
+
+    function logout() {
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+    }
+</script>
+
+<style>
+    /* ── TOAST ── */
+    #toast-container { position:fixed; bottom:24px; right:24px; z-index:99999; display:flex; flex-direction:column; gap:10px; }
+    .toast { background:#333; color:white; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:500; box-shadow:0 4px 15px rgba(0,0,0,0.2); opacity:0; transform:translateX(60px); transition:all 0.35s ease; max-width:320px; }
+    .toast.show { opacity:1; transform:translateX(0); }
+    .toast-success { background:#2e7d32; }
+    .toast-error { background:#c62828; }
+    .toast-info { background:#1565c0; }
+
+    /* ── USER ACCOUNT DROPDOWN ── */
+    .user-account-wrapper { position:relative; margin-left:15px; }
+    .user-account-btn { display:flex; align-items:center; gap:8px; background:white; color:#d00; border:2px solid white; padding:7px 14px; border-radius:20px; font-size:14px; font-weight:bold; cursor:pointer; transition:0.2s; white-space:nowrap; }
+    .user-account-btn:hover { background:#d00; color:white; border-color:#d00; }
+    .user-account-btn i.fa-chevron-down { transition:transform 0.25s; font-size:11px; }
+    .user-account-btn .fa-circle-user { font-size:18px; }
+    .user-dropdown { display:none; position:absolute; top:calc(100% + 10px); right:0; background:white; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.18); min-width:210px; z-index:5000; overflow:hidden; padding:8px 0; }
+    .user-dropdown.open { display:block; animation:dropIn 0.2s ease; }
+    @keyframes dropIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+    .dropdown-header { display:flex; align-items:center; gap:10px; padding:12px 16px 10px; }
+    .dropdown-avatar { font-size:32px; color:#ff6600; }
+    .dropdown-header span { font-weight:bold; font-size:15px; color:#222; }
+    .dropdown-divider { border:none; border-top:1px solid #f0f0f0; margin:4px 0; }
+    .dropdown-item { display:flex; align-items:center; gap:10px; width:100%; padding:10px 16px; background:none; border:none; text-align:left; font-size:14px; color:#333; cursor:pointer; transition:background 0.15s; border-radius:0; }
+    .dropdown-item:hover { background:#fff5e0; color:#d00; }
+    .dropdown-item i { width:16px; text-align:center; color:#ff6600; }
+    .dropdown-logout { color:#c62828 !important; }
+    .dropdown-logout i { color:#c62828 !important; }
+    .dropdown-logout:hover { background:#fff0f0 !important; }
+
+    /* ── MENU CONTROLS ── */
+    .menu-controls { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; max-width:1100px; margin:0 auto 28px; padding:0 20px; }
+    .category-filters { display:flex; gap:8px; flex-wrap:wrap; }
+    .cat-btn { padding:8px 18px; border-radius:20px; border:2px solid orange; background:white; color:#d00; font-size:14px; font-weight:bold; cursor:pointer; transition:0.2s; }
+    .cat-btn.active, .cat-btn:hover { background:orange; color:white; border-color:orange; }
+    .search-box { display:flex; align-items:center; background:white; border:2px solid #e0e0e0; border-radius:22px; padding:7px 14px; gap:8px; transition:border 0.2s; }
+    .search-box:focus-within { border-color:orange; }
+    .search-icon { color:#aaa; font-size:14px; }
+    .search-box input { border:none; outline:none; font-size:14px; width:180px; background:transparent; color:#333; }
+
+    /* ── POPUP INSTRUCTIONS ── */
+    .popup-close { position:absolute; top:8px; right:10px; background:none; border:none; font-size:18px; cursor:pointer; color:#999; line-height:1; padding:4px; }
+    .popup-close:hover { color:#d00; }
+    .popup-card { position:relative; }
+    .popup-instructions { margin:10px 0; text-align:left; }
+    .popup-instructions label { font-size:13px; font-weight:600; color:#555; display:block; margin-bottom:5px; }
+    .popup-instructions textarea { width:100%; height:60px; padding:8px 10px; border:1px solid #ddd; border-radius:8px; font-size:13px; resize:none; box-sizing:border-box; outline:none; transition:border 0.2s; font-family:Arial,sans-serif; }
+    .popup-instructions textarea:focus { border-color:orange; }
+
+    /* ── MODALS ── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9998; align-items:center; justify-content:center; }
+    .modal-overlay.active { display:flex; animation:fadeIn 0.2s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .modal-card { background:white; border-radius:16px; padding:28px 24px; width:360px; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.25); box-sizing:border-box; }
+    .modal-card-wide { width:460px; }
+    .modal-close { position:absolute; top:12px; right:14px; background:none; border:none; font-size:20px; cursor:pointer; color:#aaa; line-height:1; }
+    .modal-close:hover { color:#d00; }
+    .modal-card h2 { font-size:18px; color:#333; margin:0 0 18px; display:flex; align-items:center; gap:8px; }
+    .modal-card h2 i { color:orange; }
+    .modal-field { margin-bottom:14px; }
+    .modal-field label { font-size:13px; color:#777; display:block; margin-bottom:5px; font-weight:600; }
+    .modal-field input { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; outline:none; box-sizing:border-box; transition:border 0.2s; }
+    .modal-field input:focus { border-color:orange; }
+    .modal-field input[readonly] { background:#f7f7f7; color:#555; }
+    .modal-btn { width:100%; padding:11px; background:orange; color:white; font-size:15px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; transition:0.2s; margin-top:6px; }
+    .modal-btn:hover { background:#e07000; }
+    .modal-btn-save { background:#2e7d32; margin-top:8px; }
+    .modal-btn-save:hover { background:#1b5e20; }
+    .profile-avatar { text-align:center; font-size:64px; color:#ff6600; margin:10px 0 18px; }
+
+    /* ── ORDER HISTORY ── */
+    .history-card { border:1px solid #eee; border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+    .history-top { display:flex; justify-content:space-between; margin-bottom:6px; font-size:14px; }
+    .history-date { color:#999; font-size:12px; }
+    .history-items { display:flex; flex-direction:column; gap:2px; font-size:13px; color:#555; margin-bottom:8px; }
+    .history-bottom { display:flex; justify-content:space-between; font-size:13px; }
+    .history-method { color:#ff6600; font-weight:bold; }
+
+    /* ── SAVED ADDRESSES ── */
+    .addr-card { display:flex; align-items:center; justify-content:space-between; border:1px solid #eee; border-radius:10px; padding:10px 14px; margin-bottom:8px; }
+    .addr-info { display:flex; flex-direction:column; gap:2px; }
+    .addr-info strong { font-size:14px; color:#333; }
+    .addr-info span { font-size:12px; color:#888; }
+    .addr-delete { background:none; border:none; font-size:18px; cursor:pointer; color:#ccc; padding:4px; border-radius:50%; }
+    .addr-delete:hover { color:#c62828; background:#fff0f0; }
+    .add-address-form { border-top:1px solid #eee; padding-top:14px; margin-top:6px; display:flex; flex-direction:column; gap:8px; }
+    .add-address-form input { width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:8px; font-size:13px; outline:none; box-sizing:border-box; }
+    .add-address-form input:focus { border-color:orange; }
+</style> 
+</body>
+</html>
