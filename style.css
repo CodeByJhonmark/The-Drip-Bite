@@ -386,7 +386,9 @@ h2.menu {
     align-items: center;
     gap: 4px;
 }
-
+.open-btn:hover{
+    background-color: #f8f8f8;
+}
 .open-btn p {
     margin: 0;
 }
