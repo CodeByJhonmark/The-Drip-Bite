@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>The Drip Bite / Cart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="cart.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- TOAST (#20 FIX: styled toasts instead of alerts) -->
+    <div id="toast-container"></div>
+
+    <div class="cart_content">
+        <div class="cart-header-row">
+            <!-- #9 FIX: Back button with proper Font Awesome icon -->
+            <button class="back-button" onclick="goBack()" title="Go Back">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h1>Your Cart</h1>
+            <button class="view-order-btn" id="view-order-btn" onclick="openViewOrder()">
+                <i class="fa-solid fa-motorcycle"></i> View Order
+            </button>
+        </div>
+        <ul id="cart-items"></ul>
+
+        <!-- PROMO CODE -->
+        <div class="promo-row">
+            <input type="text" id="promo-input" placeholder="Enter promo code" maxlength="20">
+            <button class="promo-btn" onclick="applyPromo()">Apply</button>
+        </div>
+        <div id="promo-msg"></div>
+
+        <!-- PRICE BREAKDOWN -->
+        <div class="price-breakdown">
+            <div class="breakdown-row"><span>Subtotal</span><span id="subtotal-display">₱0</span></div>
+            <div class="breakdown-row discount-row" id="discount-row" style="display:none;"><span id="discount-label">Discount</span><span id="discount-display" style="color:#2e7d32;">-₱0</span></div>
+            <div class="breakdown-row"><span>Delivery Fee</span><span id="delivery-fee-display">₱0 (Free)</span></div>
+            <div class="breakdown-row total-row-main"><span><b>Total</b></span><span id="total-price"><b>₱0</b></span></div>
+        </div>
+
+        <div class="cart-btns">
+            <button class="clear-cart" onclick="clearCart()">Clear Cart</button>
+            <button class="buy-button" onclick="openDeliveryTime()">Proceed Order</button>
+        </div>
+    </div>
+
+    <!-- STEP 1: DELIVERY TYPE -->
+    <div class="pay-overlay" id="delivery-time-overlay" style="display:none;">
+        <div class="pay-card step-card">
+            <div class="step-indicator">
+                <div class="step active">1<span>Delivery</span></div>
+                <div class="step-line"></div>
+                <div class="step">2<span>Address</span></div>
+                <div class="step-line"></div>
+                <div class="step">3<span>Payment</span></div>
+            </div>
+            <h3 style="text-align:center;color:#333;margin-bottom:16px;">Estimated Delivery</h3>
+
+            <div class="delivery-option selected" id="opt-standard" onclick="selectDelivery('standard')">
+                <div class="delivery-icon"><i class="fa-solid fa-motorcycle"></i></div>
+                <div class="delivery-info"><strong>Standard</strong><span>5 – 20 mins</span></div>
+                <div class="delivery-fee-tag">Free</div>
+                <div class="delivery-check" id="check-standard"><i class="fa-solid fa-check"></i></div>
+            </div>
+
+            <div class="delivery-option" id="opt-priority" onclick="selectDelivery('priority')">
+                <div class="delivery-icon"><i class="fa-solid fa-bolt"></i></div>
+                <div class="delivery-info"><strong>Priority</strong><span>5 – 15 mins</span><small style="color:#888;">Get your order faster</small></div>
+                <div class="delivery-badge">+ ₱19.00</div>
+                <div class="delivery-check hidden" id="check-priority"><i class="fa-solid fa-check"></i></div>
+            </div>
+
+            <div class="delivery-option" id="opt-scheduled" onclick="selectDelivery('scheduled')">
+                <div class="delivery-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                <div class="delivery-info"><strong>Scheduled</strong><span>Select a date and time</span></div>
+                <div class="delivery-fee-tag">Free</div>
+                <div class="delivery-check hidden" id="check-scheduled"><i class="fa-solid fa-check"></i></div>
+            </div>
+
+            <div id="scheduled-fields" style="display:none;margin-top:10px;">
+                <input type="datetime-local" id="scheduled-datetime" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:14px;box-sizing:border-box;">
+            </div>
+
+            <div class="eta-summary" id="eta-summary">
+                <i class="fa-regular fa-clock"></i> Estimated: <strong id="eta-summary-text">5 – 20 mins</strong> &nbsp;|&nbsp; Fee: <strong id="fee-summary-text">Free</strong>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:18px;">
+                <button class="cancel-btn" onclick="closeDeliveryTime()">Cancel</button>
+                <button class="proceed-btn" style="background:orange;" onclick="openAddress()">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 2: ADDRESS -->
+    <div class="pay-overlay" id="address-overlay" style="display:none;">
+        <div class="pay-card step-card">
+            <div class="step-indicator">
+                <div class="step done"><i class="fa-solid fa-check"></i><span>Delivery</span></div>
+                <div class="step-line active-line"></div>
+                <div class="step active">2<span>Address</span></div>
+                <div class="step-line"></div>
+                <div class="step">3<span>Payment</span></div>
+            </div>
+            <h3 style="color:#333;margin-bottom:14px;">Delivery Address</h3>
+
+            <div id="saved-addr-picker" style="margin-bottom:10px;"></div>
+
+            <div class="address-box">
+                <div class="address-row">
+                    <span class="address-icon"><i class="fa-solid fa-location-dot"></i></span>
+                    <div class="address-text">
+                        <input type="text" id="address-label" placeholder="Label (e.g. Home, Office)" style="font-weight:bold;width:100%;border:none;border-bottom:1px solid #eee;padding:4px 0;font-size:14px;outline:none;">
+                        <input type="text" id="address-street" placeholder="Street / Barangay" style="width:100%;border:none;border-bottom:1px solid #eee;padding:4px 0;font-size:13px;color:#555;outline:none;margin-top:4px;">
+                        <input type="text" id="address-city" placeholder="City / Province" style="width:100%;border:none;padding:4px 0;font-size:13px;color:#555;outline:none;margin-top:4px;">
+                    </div>
+                </div>
+                <!-- #14 FIX: GPS button with better error handling and HTTPS note -->
+                <button class="gps-btn" onclick="useGPS()">
+                    <span id="gps-icon"><i class="fa-solid fa-location-crosshairs"></i></span> Use My Current Location
+                </button>
+                <p id="gps-status" style="font-size:12px;color:#888;margin:4px 0 0;text-align:center;"></p>
+            </div>
+
+            <div class="address-box" style="margin-top:10px;">
+                <label style="font-size:13px;color:#555;display:block;margin-bottom:6px;">Delivery instructions</label>
+                <textarea id="delivery-note" placeholder="Note to rider – e.g. landmark, gate code..." style="width:100%;height:70px;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:13px;resize:none;box-sizing:border-box;"></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button class="cancel-btn" onclick="backToDelivery()">Back</button>
+                <button class="proceed-btn" style="background:orange;" onclick="openPayment()">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 3: PAYMENT -->
+    <div class="pay-overlay" id="pay-overlay" style="display:none;">
+        <div class="pay-card step-card">
+            <div class="step-indicator">
+                <div class="step done"><i class="fa-solid fa-check"></i><span>Delivery</span></div>
+                <div class="step-line active-line"></div>
+                <div class="step done"><i class="fa-solid fa-check"></i><span>Address</span></div>
+                <div class="step-line active-line"></div>
+                <div class="step active">3<span>Payment</span></div>
+            </div>
+            <div class="pay-header">
+                <span><i class="fa-solid fa-credit-card"></i> PAYMENT METHOD</span>
+                <button class="cancel-btn" onclick="backToAddress()">Back</button>
+            </div>
+            <div class="payment-summary" id="payment-summary"></div>
+            <div class="pay-options">
+                <label class="pay-option" id="opt-cash" onclick="selectPayment('cash')">
+                    <input type="radio" name="payment" value="cash">
+                    <span><i class="fa-solid fa-money-bill-wave"></i> Cash on Delivery</span>
+                </label>
+                <label class="pay-option" id="opt-gcash" onclick="selectPayment('gcash')">
+                    <input type="radio" name="payment" value="gcash">
+                    <span><i class="fa-solid fa-mobile-screen"></i> GCash or Maya</span>
+                </label>
+            </div>
+            <div class="pay-fields" id="gcash-fields" style="display:none;">
+                <label style="font-size:13px;color:#555;margin-bottom:6px;display:block;">Choose your e-wallet:</label>
+                <select id="gcash-select" onchange="checkGcash()" style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:14px;box-sizing:border-box;outline:none;cursor:pointer;">
+                    <option value="">-- Select --</option>
+                    <option value="GCash">GCash</option>
+                    <option value="Maya">Maya</option>
+                </select>
+            </div>
+            <button class="proceed-btn" id="proceed-btn" disabled onclick="proceedOrder()">Proceed Order</button>
+        </div>
+    </div>
+
+    <!-- QR POPUP -->
+    <div class="pay-overlay" id="qr-overlay" style="display:none;">
+        <div class="qr-card">
+            <div class="qr-header" id="qr-header">
+                <div class="qr-title" id="qr-title">GCash</div>
+                <div class="qr-scan-text">SCAN TO PAY HERE</div>
+            </div>
+            <div class="qr-body">
+                <p class="qr-merchant">The Drip Bite</p>
+                <img id="qr-image" src="assets/qr-placeholder.png" alt="QR Code" class="qr-img">
+                <p class="qr-total" id="qr-total">Total: ₱0</p>
+                <p class="qr-instruction" id="qr-instruction">Open your e-wallet app and scan the QR code.</p>
+            </div>
+            <div class="qr-btn-row">
+                <button class="qr-back-btn" onclick="backToPayment()">Back</button>
+                <button class="qr-paid-btn" onclick="confirmPayment()">I've Paid <i class='fa-solid fa-check'></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECEIPT -->
+    <div class="pay-overlay" id="receipt-overlay" style="display:none;">
+        <div class="receipt-card">
+            <div class="receipt-header">
+                <img src="assets/LOGO.png" alt="Logo" class="receipt-logo">
+                <h2>The Drip Bite</h2>
+                <p class="receipt-sub">Official Receipt</p>
+            </div>
+            <hr>
+            <div id="receipt-body"></div>
+            <hr>
+            <div id="receipt-total"></div>
+            <p class="receipt-thank"><i class="fa-solid fa-star"></i> Thank you for your order! <i class="fa-solid fa-star"></i></p>
+            <!-- Inline button row: Track | Cancel | Close -->
+            <div class="receipt-btn-row">
+                <button class="receipt-track-btn" onclick="openTracking(currentReceiptOrderId)">
+                    <i class="fa-solid fa-motorcycle"></i> Track
+                </button>
+                <button class="receipt-cancel-btn" id="cancel-btn" onclick="cancelOrder()">
+                    <i class="fa-solid fa-circle-xmark"></i> Cancel
+                    <span class="cancel-countdown" id="cancel-countdown"></span>
+                </button>
+                <button class="receipt-close-btn" onclick="closeReceipt()">
+                    <i class="fa-solid fa-xmark"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW ORDER OVERLAY (#17 FIX: delivered orders can be deleted) -->
+    <div class="pay-overlay" id="view-order-overlay" style="display:none;">
+        <div class="pay-card step-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="margin:0;color:#333;font-size:17px;"><i class="fa-solid fa-receipt"></i> Active Orders</h3>
+                <button class="cancel-btn" onclick="closeViewOrder()"><i class="fa-solid fa-xmark"></i> Close</button>
+            </div>
+            <div id="vo-orders-list"></div>
+        </div>
+    </div>
+
+    <!-- TRACKING (#15 FIX: per-order tracking, #16 FIX: scheduled shows days) -->
+    <div class="pay-overlay" id="tracking-overlay" style="display:none;">
+        <div class="tracking-card">
+            <div class="tracking-top">
+                <span class="tracking-title">YOUR ORDER</span>
+                <p class="tracking-order-code" id="tracking-order-code"></p>
+            </div>
+            <div class="tracking-eta">
+                <p class="eta-label" id="eta-label">Stage time remaining</p>
+                <p class="eta-time" id="eta-time">—</p>
+            </div>
+            <div class="tracking-illustration">
+                <div class="track-icon" id="track-icon"><i class="fa-solid fa-utensils"></i></div>
+            </div>
+            <div class="track-progress">
+                <div class="track-bar-wrap"><div class="track-bar" id="bar-1"></div><span class="bar-label"><i class="fa-solid fa-utensils"></i> Preparing</span><span class="bar-timer" id="bar-timer-1">2 min</span></div>
+                <div class="track-bar-wrap"><div class="track-bar" id="bar-2"></div><span class="bar-label"><i class="fa-solid fa-motorcycle"></i> Rider Heading</span><span class="bar-timer" id="bar-timer-2">—</span></div>
+                <div class="track-bar-wrap"><div class="track-bar" id="bar-3"></div><span class="bar-label"><i class="fa-solid fa-motorcycle"></i> On the Way</span><span class="bar-timer" id="bar-timer-3">—</span></div>
+                <div class="track-bar-wrap"><div class="track-bar" id="bar-4"></div><span class="bar-label"><i class="fa-solid fa-circle-check"></i> Delivered</span><span class="bar-timer" id="bar-timer-4">—</span></div>
+            </div>
+            <p class="track-status-text" id="track-status-text">Preparing your food.</p>
+            <div class="track-address-box">
+                <div class="track-address-title"><i class="fa-solid fa-location-dot"></i> Delivery details</div>
+                <p class="track-address-text" id="track-address-display">—</p>
+                <p class="track-note-text" id="track-note-display"></p>
+            </div>
+            <button class="close-track-btn" onclick="closeTracking()">Close</button>
+        </div>
+    </div>
+
+<script>
+    // ── TOAST (#20 FIX) ──────────────────────────────────────────
+    function showToast(message, type) {
+        type = type || 'success';
+        var c = document.getElementById('toast-container');
+        var el = document.createElement('div');
+        el.className = 'cart-toast cart-toast-' + type;
+        var icon = type==='success'?'circle-check':type==='error'?'circle-xmark':'circle-info';
+        el.innerHTML = '<i class="fa-solid fa-'+icon+'"></i> ' + message;
+        c.appendChild(el);
+        setTimeout(function(){ el.classList.add('show'); }, 10);
+        setTimeout(function(){ el.classList.remove('show'); setTimeout(function(){ el.remove(); }, 400); }, 3200);
+    }
+
+    // ── STATE ─────────────────────────────────────────────────────
+    var selectedPayment = '';
+    var selectedDelivery = 'standard';
+    var gpsUsed = false;
+    var appliedPromo = null;
+    var cancelCountdownInterval = null;
+    var currentReceiptOrderId = null;
+    var trackingInterval = null;
+    var currentTrackingOrderId = null;
+
+    // ── ACTIVE ORDERS ─────────────────────────────────────────────
+    function getActiveOrders() { return JSON.parse(localStorage.getItem('dripbite_active_orders') || '[]'); }
+    function saveActiveOrders(orders) { localStorage.setItem('dripbite_active_orders', JSON.stringify(orders)); }
+    function addActiveOrder(order) { var o = getActiveOrders(); o.push(order); saveActiveOrders(o); }
+    function removeActiveOrder(id) { saveActiveOrders(getActiveOrders().filter(function(o){ return o.id !== id; })); }
+    function getActiveOrder(id) { return getActiveOrders().find(function(o){ return o.id === id; }) || null; }
+
+    var PROMOS = {
+        'DRIP10':  { type:'percent', value:10, label:'10% off' },
+        'BITE20':  { type:'percent', value:20, label:'20% off' },
+        'WELCOME': { type:'fixed',   value:50, label:'₱50 off' }
+    };
+
+    var DELIVERY_INFO = {
+        standard:  { fee:0,  eta:'5 – 20 mins', feeLabel:'Free' },
+        priority:  { fee:19, eta:'5 – 15 mins', feeLabel:'₱19.00' },
+        scheduled: { fee:0,  eta:'Scheduled',   feeLabel:'Free' }
+    };
+
+    // Stage transition times in seconds
+    var STAGE_TIMES = {
+        standard: [0, 120, 540, 1320],
+        priority: [0, 120, 420, 1020],
+        scheduled: [0, 120, 540, 1320]
+    };
+
+    function getStageFromElapsed(secs, type) {
+        var times = STAGE_TIMES[type] || STAGE_TIMES.standard;
+        for (var i = times.length - 1; i >= 0; i--) { if (secs >= times[i]) return i; }
+        return 0;
+    }
+
+    function getStageTimeRemaining(elapsed, type, stage) {
+        var times = STAGE_TIMES[type] || STAGE_TIMES.standard;
+        if (stage >= times.length - 1) return 0;
+        return Math.max(0, times[stage + 1] - elapsed);
+    }
+
+    // #16 FIX: For scheduled orders show days/hours/mins until scheduled time
+    function getScheduledETA(order) {
+        if (!order.scheduledDatetime) return null;
+        var target = new Date(order.scheduledDatetime).getTime();
+        var now = Date.now();
+        var diff = Math.max(0, Math.floor((target - now) / 1000));
+        if (diff <= 0) return null; // past scheduled time — treat as normal
+        var days = Math.floor(diff / 86400);
+        var hours = Math.floor((diff % 86400) / 3600);
+        var mins = Math.floor((diff % 3600) / 60);
+        if (days > 0) return days + 'd ' + hours + 'h ' + mins + 'min';
+        if (hours > 0) return hours + 'h ' + mins + 'min';
+        return mins + ' min';
+    }
+
+    function fmtTime(secs) {
+        var m = Math.floor(secs / 60), s = secs % 60;
+        if (m > 0 && s > 0) return m + ' min ' + s + ' sec';
+        if (m > 0) return m + ' min';
+        return s + ' sec';
+    }
+
+    var trackStages = [
+        { icon:'<i class="fa-solid fa-utensils"></i>', text:'Preparing your food. Your rider will pick it up once it\'s ready.' },
+        { icon:'<i class="fa-solid fa-motorcycle"></i>', text:'We\'ve got you a rider! They\'re heading to the restaurant.' },
+        { icon:'<i class="fa-solid fa-motorcycle"></i>', text:'Your rider has picked up your order and is on the way to you!' },
+        { icon:'<i class="fa-solid fa-circle-check"></i>', text:'Your order has been delivered! Enjoy your meal!' }
+    ];
+
+    // ── CART ──────────────────────────────────────────────────────
+    function getSubtotal() {
+        return (JSON.parse(localStorage.getItem('cart')) || []).reduce(function(s,it){ return s + parseInt(it.price)*it.quantity; }, 0);
+    }
+    function getDiscount(sub) {
+        if (!appliedPromo) return 0;
+        return appliedPromo.type === 'percent' ? Math.round(sub * appliedPromo.value / 100) : Math.min(appliedPromo.value, sub);
+    }
+    function getFinalTotal() { var s=getSubtotal(); return s - getDiscount(s) + DELIVERY_INFO[selectedDelivery].fee; }
+
+    function loadCart() {
+        var cart = JSON.parse(localStorage.getItem('cart')) || [];
+        var ul = document.getElementById('cart-items');
+        ul.innerHTML = '';
+        cart.forEach(function(item, i) {
+            var li = document.createElement('li');
+            var instr = item.instructions ? '<div class="item-instructions"><i class="fa-solid fa-note-sticky"></i> ' + item.instructions + '</div>' : '';
+            li.innerHTML =
+                '<span class="item-name">' + item.name + '</span>' +
+                '<span class="item-price">₱' + item.price + '</span>' +
+                '<div class="quantity-controls">' +
+                    '<button class="qty-btn" onclick="changeQuantity('+i+',-1)">−</button>' +
+                    '<span class="qty-number">'+item.quantity+'</span>' +
+                    '<button class="qty-btn" onclick="changeQuantity('+i+',1)">+</button>' +
+                '</div>' +
+                '<button class="remove-btn" onclick="removeItem('+i+')">Remove</button>' + instr;
+            ul.appendChild(li);
+        });
+        updatePriceDisplay();
+    }
+
+    function updatePriceDisplay() {
+        var sub = getSubtotal(), disc = getDiscount(sub), fee = DELIVERY_INFO[selectedDelivery].fee;
+        document.getElementById('subtotal-display').textContent = '₱' + sub;
+        document.getElementById('delivery-fee-display').textContent = fee === 0 ? '₱0 (Free)' : '₱' + fee;
+        if (disc > 0) {
+            document.getElementById('discount-row').style.display = '';
+            document.getElementById('discount-label').textContent = appliedPromo ? appliedPromo.label : 'Discount';
+            document.getElementById('discount-display').textContent = '-₱' + disc;
+        } else { document.getElementById('discount-row').style.display = 'none'; }
+        document.getElementById('total-price').innerHTML = '<b>₱' + (sub - disc + fee) + '</b>';
+    }
+
+    function changeQuantity(i, d) {
+        var cart = JSON.parse(localStorage.getItem('cart')) || [];
+        cart[i].quantity += d;
+        if (cart[i].quantity <= 0) cart.splice(i, 1);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        loadCart();
+    }
+
+    function removeItem(i) {
+        var cart = JSON.parse(localStorage.getItem('cart')) || [];
+        cart.splice(i, 1);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        loadCart();
+        showToast('Item removed.', 'info');
+    }
+
+    function clearCart() {
+        localStorage.removeItem('cart');
+        appliedPromo = null;
+        document.getElementById('promo-input').value = '';
+        document.getElementById('promo-msg').innerHTML = '';
+        loadCart();
+        showToast('Cart cleared.', 'info');
+    }
+
+    // ── PROMO ─────────────────────────────────────────────────────
+    function applyPromo() {
+        var code = document.getElementById('promo-input').value.trim().toUpperCase();
+        var msg = document.getElementById('promo-msg');
+        if (!code) { msg.innerHTML = '<span class="promo-error">Please enter a promo code.</span>'; return; }
+        if (PROMOS[code]) {
+            appliedPromo = PROMOS[code];
+            msg.innerHTML = '<span class="promo-success"><i class="fa-solid fa-circle-check"></i> Applied: ' + appliedPromo.label + '!</span>';
+            updatePriceDisplay();
+            showToast('Promo "' + code + '" applied!');
+        } else {
+            appliedPromo = null;
+            msg.innerHTML = '<span class="promo-error"><i class="fa-solid fa-circle-xmark"></i> Invalid promo code.</span>';
+            updatePriceDisplay();
+        }
+    }
+
+    // ── DELIVERY FLOW ─────────────────────────────────────────────
+    function openDeliveryTime() {
+        var cart = JSON.parse(localStorage.getItem('cart')) || [];
+        if (cart.length === 0) { showToast('Your cart is empty!', 'error'); return; }
+        if (getSubtotal() < 100) { showToast('Minimum order is ₱100.', 'error'); return; }
+        document.getElementById('delivery-time-overlay').style.display = 'flex';
+    }
+    function closeDeliveryTime() { document.getElementById('delivery-time-overlay').style.display = 'none'; }
+
+    function selectDelivery(type) {
+        selectedDelivery = type;
+        ['standard','priority','scheduled'].forEach(function(t){
+            document.getElementById('opt-'+t).classList.toggle('selected', t===type);
+            document.getElementById('check-'+t).classList.toggle('hidden', t!==type);
+        });
+        document.getElementById('scheduled-fields').style.display = type==='scheduled' ? 'block' : 'none';
+        var info = DELIVERY_INFO[type];
+        document.getElementById('eta-summary-text').textContent = info.eta;
+        document.getElementById('fee-summary-text').textContent = info.feeLabel;
+        updatePriceDisplay();
+    }
+
+    function openAddress() {
+        // FIX: Validate scheduled date — max 3 days from now
+        if (selectedDelivery === 'scheduled') {
+            var dtVal = document.getElementById('scheduled-datetime').value;
+            if (!dtVal) {
+                showToast('Please select a scheduled date and time.', 'error');
+                return;
+            }
+            var selectedTime = new Date(dtVal).getTime();
+            var now = Date.now();
+            var maxTime = now + (3 * 24 * 60 * 60 * 1000); // 3 days from now
+            if (selectedTime <= now) {
+                showToast('Scheduled time must be in the future.', 'error');
+                return;
+            }
+            if (selectedTime > maxTime) {
+                showToast('Scheduled orders can only be placed up to 3 days in advance.', 'error');
+                return;
+            }
+        }
+        document.getElementById('delivery-time-overlay').style.display = 'none';
+        loadSavedAddrPicker();
+        document.getElementById('address-overlay').style.display = 'flex';
+    }
+
+    function loadSavedAddrPicker() {
+        var addrs = JSON.parse(localStorage.getItem('dripbite_addresses') || '[]');
+        var picker = document.getElementById('saved-addr-picker');
+        if (!addrs.length) { picker.innerHTML=''; return; }
+        picker.innerHTML = '<p style="font-size:12px;color:#888;margin:0 0 6px;">Saved addresses:</p>' +
+            addrs.map(function(a,i){ return '<button class="saved-addr-btn" onclick="useSavedAddr('+i+')"><strong>'+a.label+'</strong> — '+a.street+', '+a.city+'</button>'; }).join('');
+    }
+
+    function useSavedAddr(i) {
+        var a = JSON.parse(localStorage.getItem('dripbite_addresses') || '[]')[i];
+        document.getElementById('address-label').value = a.label;
+        document.getElementById('address-street').value = a.street;
+        document.getElementById('address-city').value = a.city;
+        gpsUsed = true;
+        document.getElementById('gps-status').style.color = '#4caf50';
+        document.getElementById('gps-status').textContent = '✅ Address selected!';
+    }
+
+    function backToDelivery() {
+        gpsUsed = false;
+        document.getElementById('address-overlay').style.display = 'none';
+        document.getElementById('delivery-time-overlay').style.display = 'flex';
+    }
+
+    // #14 FIX: Improved GPS with clearer error messages
+    function useGPS() {
+        var status = document.getElementById('gps-status');
+        var icon = document.getElementById('gps-icon');
+        if (!navigator.geolocation) {
+            status.style.color = 'red';
+            status.textContent = 'Geolocation is not supported by your browser.';
+            return;
+        }
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            status.style.color = '#e65100';
+            status.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> GPS requires HTTPS. Please fill in your address manually.';
+            return;
+        }
+        status.style.color = '#888';
+        status.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Detecting your location...';
+        icon.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                var lat = pos.coords.latitude, lng = pos.coords.longitude;
+                fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json', {
+                    headers: { 'Accept-Language': 'en', 'User-Agent': 'TheDripBiteApp/1.0' }
+                })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    var addr = data.address || {};
+                    document.getElementById('address-street').value = [addr.road, addr.suburb, addr.neighbourhood].filter(Boolean).join(', ') || '';
+                    document.getElementById('address-city').value = [addr.city||addr.town||addr.municipality, addr.state].filter(Boolean).join(', ') || '';
+                    document.getElementById('address-label').value = 'Current Location';
+                    status.style.color = '#4caf50';
+                    status.innerHTML = '<i class="fa-solid fa-circle-check"></i> Location detected!';
+                    icon.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
+                    gpsUsed = true;
+                })
+                .catch(function(){
+                    document.getElementById('address-street').value = 'GPS coords: ' + lat.toFixed(5) + ', ' + lng.toFixed(5);
+                    document.getElementById('address-city').value = 'Philippines';
+                    document.getElementById('address-label').value = 'Current Location';
+                    status.style.color = '#4caf50';
+                    status.innerHTML = '<i class="fa-solid fa-circle-check"></i> GPS located (address lookup unavailable)!';
+                    icon.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
+                    gpsUsed = true;
+                });
+            },
+            function(err) {
+                icon.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
+                status.style.color = 'red';
+                if (err.code === err.PERMISSION_DENIED) {
+                    status.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Location access denied. Please allow location permission or enter your address manually.';
+                } else if (err.code === err.POSITION_UNAVAILABLE) {
+                    status.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Location unavailable. Please enter your address manually.';
+                } else {
+                    status.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Location request timed out. Please enter your address manually.';
+                }
+            },
+            { timeout: 10000, enableHighAccuracy: true }
+        );
+    }
+
+    function openPayment() {
+        var street = document.getElementById('address-street').value.trim();
+        var city = document.getElementById('address-city').value.trim();
+        if (!gpsUsed && (!street || !city)) {
+            var status = document.getElementById('gps-status');
+            status.style.color = 'red';
+            status.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Please fill in your full address or use current location.';
+            return;
+        }
+        document.getElementById('address-overlay').style.display = 'none';
+        var sub = getSubtotal(), disc = getDiscount(sub), fee = DELIVERY_INFO[selectedDelivery].fee, total = sub - disc + fee;
+        var summaryHtml = '<div class="pay-summary-row"><span>Subtotal</span><span>₱'+sub+'</span></div>';
+        if (disc > 0) summaryHtml += '<div class="pay-summary-row" style="color:#2e7d32;"><span>Discount</span><span>-₱'+disc+'</span></div>';
+        summaryHtml += '<div class="pay-summary-row"><span>Delivery</span><span>'+(fee?'₱'+fee:'Free')+'</span></div>';
+        summaryHtml += '<div class="pay-summary-row pay-summary-total"><span><b>Total</b></span><span><b>₱'+total+'</b></span></div>';
+        document.getElementById('payment-summary').innerHTML = summaryHtml;
+        selectedPayment = '';
+        document.querySelectorAll('input[name="payment"]').forEach(function(r){ r.checked=false; });
+        document.querySelectorAll('.pay-option').forEach(function(o){ o.classList.remove('selected'); });
+        document.getElementById('gcash-fields').style.display = 'none';
+        document.getElementById('gcash-select').value = '';
+        disableProceed();
+        document.getElementById('pay-overlay').style.display = 'flex';
+    }
+
+    function backToAddress() { document.getElementById('pay-overlay').style.display='none'; document.getElementById('address-overlay').style.display='flex'; }
+
+    function selectPayment(type) {
+        selectedPayment = type;
+        document.querySelectorAll('input[name="payment"]').forEach(function(r){ r.checked = r.value===type; });
+        document.querySelectorAll('.pay-option').forEach(function(o){ o.classList.toggle('selected', o.querySelector('input').value===type); });
+        document.getElementById('gcash-fields').style.display = type==='gcash' ? 'block' : 'none';
+        document.getElementById('gcash-select').value = '';
+        if (type==='cash') enableProceed(); else disableProceed();
+    }
+
+    function enableProceed() { var b=document.getElementById('proceed-btn'); b.disabled=false; b.style.backgroundColor='orange'; b.style.cursor='pointer'; }
+    function disableProceed() { var b=document.getElementById('proceed-btn'); b.disabled=true; b.style.backgroundColor='#ccc'; b.style.cursor='not-allowed'; }
+    function checkGcash() { document.getElementById('gcash-select').value ? enableProceed() : disableProceed(); }
+
+    function proceedOrder() {
+        var cart = JSON.parse(localStorage.getItem('cart')) || [];
+        if (!cart.length) return;
+        if (selectedPayment === 'gcash') {
+            var wallet = document.getElementById('gcash-select').value;
+            var header = document.getElementById('qr-header'), title = document.getElementById('qr-title');
+            document.getElementById('qr-total').textContent = 'Total: ₱' + getFinalTotal();
+            if (wallet === 'GCash') {
+                header.style.background='#1a8cff'; title.textContent='GCash'; title.style.color='white';
+                document.getElementById('qr-instruction').textContent='Open your GCash app and scan.';
+            } else {
+                header.style.background='linear-gradient(135deg,#5B2D8E,#3DB88B)';
+                title.textContent='maya'; title.style.color='#3DB88B';
+                document.getElementById('qr-instruction').textContent='Open your Maya app and scan.';
+            }
+            document.getElementById('pay-overlay').style.display='none';
+            document.getElementById('qr-overlay').style.display='flex';
+            document.getElementById('qr-image').src = wallet==='GCash' ? 'assets/qr-gcash.png' : 'assets/qr-maya.png';
+        } else {
+            document.getElementById('pay-overlay').style.display='none';
+            generateReceipt();
+        }
+    }
+
+    function backToPayment() { document.getElementById('qr-overlay').style.display='none'; document.getElementById('pay-overlay').style.display='flex'; }
+    function confirmPayment() { document.getElementById('qr-overlay').style.display='none'; generateReceipt(); }
+
+    function generateReceipt() {
+        var cart = JSON.parse(localStorage.getItem('cart')) || [];
+        var sub = getSubtotal(), disc = getDiscount(sub), fee = DELIVERY_INFO[selectedDelivery].fee, total = sub - disc + fee;
+        var user = JSON.parse(localStorage.getItem('user') || '{}');
+        var now = new Date();
+        var dateStr = now.toLocaleDateString('en-PH') + '  ' + now.toLocaleTimeString('en-PH');
+
+        var itemsHtml = cart.map(function(item){
+            var instr = item.instructions ? '<div style="font-size:11px;color:#888;padding-left:4px;"><i class="fa-solid fa-note-sticky"></i> '+item.instructions+'</div>' : '';
+            return '<div class="receipt-item"><span>'+item.name+' x'+item.quantity+'</span><span>₱'+(parseInt(item.price)*item.quantity)+'</span></div>'+instr;
+        }).join('');
+        document.getElementById('receipt-body').innerHTML = itemsHtml;
+
+        var txCode = 'TDB-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+        var methodText = selectedPayment==='cash' ? 'Cash on Delivery' : (document.getElementById('gcash-select').value + ' (QR Payment)');
+        var scheduledVal = selectedDelivery==='scheduled' ? document.getElementById('scheduled-datetime').value : '';
+        var deliveryLabel = selectedDelivery==='priority' ? 'Priority (5–15 mins) +₱19' :
+                            selectedDelivery==='scheduled' ? 'Scheduled – '+(scheduledVal||'TBD') : 'Standard (5–20 mins)';
+        var fullAddress = [
+            document.getElementById('address-label').value.trim(),
+            document.getElementById('address-street').value.trim(),
+            document.getElementById('address-city').value.trim()
+        ].filter(Boolean).join(', ') || 'Not provided';
+
+        var discHtml = disc>0 ? '<div class="receipt-item" style="color:#2e7d32;"><span>Discount ('+appliedPromo.label+')</span><span>-₱'+disc+'</span></div>' : '';
+        var feeHtml = fee>0 ? '<div class="receipt-item"><span>Delivery Fee</span><span>₱'+fee+'</span></div>' : '';
+
+        document.getElementById('receipt-total').innerHTML =
+            discHtml + feeHtml +
+            '<div class="receipt-item total-row"><span><b>TOTAL</b></span><span><b>₱'+total+'</b></span></div>' +
+            '<div class="receipt-item tx-row"><span style="font-size:12px;color:#888;">Transaction Code:</span><span class="tx-code">'+txCode+'</span></div>' +
+            '<hr style="border:none;border-top:1px dashed #eee;margin:6px 0;">' +
+            '<p class="receipt-info"><b>Payment:</b> '+methodText+'</p>' +
+            '<p class="receipt-info"><b>Delivery:</b> '+deliveryLabel+'</p>' +
+            '<p class="receipt-info"><b>Address:</b> '+fullAddress+'</p>' +
+            '<p class="receipt-info"><b>Customer:</b> '+(user.username||'Guest')+'</p>' +
+            '<p class="receipt-info"><b>Date:</b> '+dateStr+'</p>';
+
+        showToast('Order placed successfully!');
+
+        // #16 FIX: For scheduled orders, startTime is the scheduled datetime
+        var orderStartTime = (selectedDelivery==='scheduled' && scheduledVal) ? new Date(scheduledVal).getTime() : Date.now();
+        var orderPlacedTime = Date.now(); // always "now" — used for the 2-min cancel window
+
+        var newOrder = {
+            id: txCode,
+            startTime: orderStartTime,
+            placedTime: orderPlacedTime,
+            deliveryType: selectedDelivery,
+            scheduledDatetime: scheduledVal,
+            address: fullAddress,
+            note: document.getElementById('delivery-note').value.trim(),
+            items: cart, total: total, method: methodText, date: dateStr
+        };
+        addActiveOrder(newOrder);
+        currentReceiptOrderId = txCode;
+
+        var history = JSON.parse(localStorage.getItem('dripbite_order_history') || '[]');
+        history.push({ code:txCode, date:dateStr, items:cart, total:total, method:methodText });
+        localStorage.setItem('dripbite_order_history', JSON.stringify(history));
+
+        localStorage.removeItem('cart');
+        appliedPromo = null;
+        loadCart();
+
+        document.getElementById('receipt-overlay').style.display = 'flex';
+        startCancelCountdown(txCode);
+    }
+
+    var CANCEL_WINDOW_SECS = 120;
+
+    function startCancelCountdown(orderId) {
+        var btn = document.getElementById('cancel-btn');
+        var countdown = document.getElementById('cancel-countdown');
+        var order = getActiveOrder(orderId);
+        if (!btn) return;
+        if (!order) { btn.disabled = true; btn.classList.add('cancel-expired'); return; }
+        if (cancelCountdownInterval) clearInterval(cancelCountdownInterval);
+
+        function updateBtn() {
+            var elapsed = Math.floor((Date.now() - (order.placedTime || order.startTime)) / 1000);
+            var remaining = CANCEL_WINDOW_SECS - elapsed;
+            if (remaining <= 0) {
+                clearInterval(cancelCountdownInterval);
+                btn.disabled = true;
+                btn.classList.add('cancel-expired');
+                countdown.textContent = '';
+                return;
+            }
+            btn.disabled = false;
+            btn.classList.remove('cancel-expired');
+            countdown.textContent = ' (' + remaining + 's)';
+        }
+        updateBtn();
+        cancelCountdownInterval = setInterval(updateBtn, 1000);
+    }
+
+    function cancelOrder() {
+        var btn = document.getElementById('cancel-btn');
+        // If button is expired/dark, show cannot cancel toast
+        if (btn && btn.classList.contains('cancel-expired')) {
+            showToast('Order can no longer be cancelled. The 2-minute window has passed.', 'error');
+            return;
+        }
+        var order = getActiveOrder(currentReceiptOrderId);
+        if (!order) { showToast('Order not found.', 'error'); return; }
+        var elapsed = Math.floor((Date.now() - (order.placedTime || order.startTime)) / 1000);
+        if (elapsed > CANCEL_WINDOW_SECS) {
+            showToast('Order can no longer be cancelled. The 2-minute window has passed.', 'error');
+            return;
+        }
+        clearInterval(cancelCountdownInterval);
+        removeActiveOrder(currentReceiptOrderId);
+        currentReceiptOrderId = null;
+        document.getElementById('receipt-overlay').style.display = 'none';
+        showToast('Your order has been cancelled.', 'info');
+    }
+
+    // ── VIEW ORDER (#15 + #17 FIX) ────────────────────────────────
+    function openViewOrder() {
+        var orders = getActiveOrders();
+        var list = document.getElementById('vo-orders-list');
+        if (!orders.length) {
+            list.innerHTML = '<div style="text-align:center;padding:24px 0;">' +
+                '<div style="font-size:44px;margin-bottom:12px;"><i class="fa-solid fa-motorcycle" style="color:orange;"></i></div>' +
+                '<p style="font-weight:bold;color:#333;font-size:15px;margin:0 0 6px;">No Active Orders</p>' +
+                '<p style="color:#999;font-size:13px;margin:0;">Place an order first!</p></div>';
+        } else {
+            list.innerHTML = orders.map(function(order, idx) {
+                var elapsed = Math.floor((Date.now() - order.startTime) / 1000);
+                // #16 FIX: scheduled orders: check if scheduled time hasn't arrived yet
+                var isScheduledFuture = (order.deliveryType==='scheduled' && order.scheduledDatetime && new Date(order.scheduledDatetime).getTime() > Date.now());
+                var stage = isScheduledFuture ? -1 : getStageFromElapsed(elapsed, order.deliveryType);
+                var stageNames = ['Preparing','Rider Heading','On the Way','Delivered'];
+                var stageColors = ['#ff9800','#1976d2','#2e7d32','#4caf50'];
+
+                var delivIcon = order.deliveryType==='priority'?'fa-bolt':order.deliveryType==='scheduled'?'fa-calendar-days':'fa-motorcycle';
+                var delivLabel = order.deliveryType==='priority'?'Priority':'order.deliveryType'==='scheduled'?'Scheduled':'Standard';
+                var itemsHtml = order.items.map(function(it){ return '<span style="font-size:12px;color:#555;">'+it.name+' x'+it.quantity+'</span>'; }).join(' · ');
+
+                var stageDisplay = stage === -1
+                    ? '<span style="color:#1565c0;font-size:12px;font-weight:bold;"><i class="fa-solid fa-calendar-days"></i> Scheduled: ' + new Date(order.scheduledDatetime).toLocaleString('en-PH') + '</span>'
+                    : '<span style="color:' + stageColors[stage] + ';">' + stageNames[stage] + '</span>';
+
+                // Delivered → delete button | Scheduled future → none | Active → styled track button
+                var actionBtn = stage === 3
+                    ? '<button class="vo-delete-btn" onclick="deleteDeliveredOrder(\'' + order.id + '\')"><i class="fa-solid fa-trash"></i> Remove from List</button>'
+                    : (stage === -1 ? '' :
+                    '<button class="vo-track-btn" onclick="closeViewOrder(); openTracking(\'' + order.id + '\');"><i class="fa-solid fa-motorcycle"></i> Track This Order</button>');
+
+                return '<div class="vo-order-card">' +
+                    '<div class="vo-card-header"><span class="vo-card-code"><i class="fa-solid fa-receipt"></i> ' + order.id + '</span>' + stageDisplay + '</div>' +
+                    '<div class="vo-card-items">' + itemsHtml + '</div>' +
+                    '<div class="vo-card-info">' +
+                        '<span><i class="fa-solid fa-location-dot"></i> ' + order.address + '</span>' +
+                        (order.note ? '<span><i class="fa-solid fa-note-sticky"></i> ' + order.note + '</span>' : '') +
+                        '<span><i class="fa-solid ' + delivIcon + '"></i> ₱' + order.total + '</span>' +
+                    '</div>' +
+                    actionBtn +
+                    '</div>';
+            }).join('');
+        }
+        document.getElementById('view-order-overlay').style.display = 'flex';
+    }
+
+    function closeViewOrder() { document.getElementById('view-order-overlay').style.display='none'; }
+
+    // #17 FIX: Delete delivered order from active list
+    function deleteDeliveredOrder(id) {
+        removeActiveOrder(id);
+        showToast('Order removed.', 'info');
+        openViewOrder(); // refresh
+    }
+
+    // ── TRACKING (#15 FIX: per-order, clean interval on switch) ──
+    function openTracking(orderId) {
+        // Always stop old interval first
+        if (trackingInterval) { clearInterval(trackingInterval); trackingInterval = null; }
+
+        // FIX: use the passed orderId, or fall back to the most recent order (last in array)
+        var orders = getActiveOrders();
+        var order = orderId ? getActiveOrder(orderId) : (orders.length ? orders[orders.length - 1] : null);
+        if (!order) { showToast('Order not found.', 'error'); return; }
+
+        currentTrackingOrderId = order.id;
+        document.getElementById('track-address-display').textContent = order.address || 'Not provided';
+        document.getElementById('track-note-display').innerHTML = order.note ? '<i class="fa-solid fa-note-sticky"></i> ' + order.note : '';
+        document.getElementById('tracking-order-code').textContent = order.id;
+        document.getElementById('tracking-overlay').style.display = 'flex';
+
+        renderCurrentStage(order);
+        trackingInterval = setInterval(function(){
+            if (document.getElementById('tracking-overlay').style.display === 'none') { clearInterval(trackingInterval); return; }
+            var fresh = getActiveOrder(currentTrackingOrderId);
+            if (fresh) renderCurrentStage(fresh);
+        }, 1000);
+    }
+
+    function renderCurrentStage(order) {
+        var delivType = order.deliveryType || 'standard';
+
+        // #16 FIX: for scheduled orders pending start, show countdown to scheduled time
+        var isScheduledFuture = (delivType==='scheduled' && order.scheduledDatetime && new Date(order.scheduledDatetime).getTime() > Date.now());
+        var elapsed = isScheduledFuture ? 0 : Math.floor((Date.now() - order.startTime) / 1000);
+        var stage = isScheduledFuture ? 0 : getStageFromElapsed(elapsed, delivType);
+        var s = trackStages[stage];
+
+        document.getElementById('track-icon').innerHTML = s.icon;
+        document.getElementById('track-status-text').textContent = s.text;
+
+        var etaEl = document.getElementById('eta-time');
+        var labelEl = document.getElementById('eta-label');
+
+        if (isScheduledFuture) {
+            // Show days/hours/mins until scheduled time
+            var eta = getScheduledETA(order);
+            etaEl.textContent = eta || '—';
+            etaEl.style.color = '#1565c0';
+            etaEl.style.fontSize = '26px';
+            labelEl.textContent = 'Scheduled in';
+        } else if (stage === 3) {
+            etaEl.innerHTML = 'Delivered! <i class="fa-solid fa-circle-check"></i>';
+            etaEl.style.color = 'orange'; etaEl.style.fontSize = '24px';
+            labelEl.textContent = 'Order status';
+        } else {
+            var stageLeft = getStageTimeRemaining(elapsed, delivType, stage);
+            etaEl.textContent = fmtTime(stageLeft);
+            etaEl.style.color = '#111'; etaEl.style.fontSize = '34px';
+            labelEl.textContent = 'Stage ' + (stage+1) + ' time remaining';
+        }
+
+        for (var i = 1; i <= 4; i++) {
+            var bar = document.getElementById('bar-'+i);
+            var timerEl = document.getElementById('bar-timer-'+i);
+            bar.className = 'track-bar';
+            var si = i - 1;
+            if (si < stage) {
+                bar.classList.add('bar-done');
+                timerEl.innerHTML = 'Done <i class="fa-solid fa-check"></i>';
+                timerEl.style.color = '#4caf50';
+            } else if (si === stage) {
+                if (stage === 3) { bar.classList.add('bar-done'); timerEl.innerHTML = '<i class="fa-solid fa-circle-check"></i>'; timerEl.style.color = '#4caf50'; }
+                else {
+                    bar.classList.add('bar-active');
+                    var left = isScheduledFuture && i===1 ? (getScheduledETA(order)||'—') : fmtTime(getStageTimeRemaining(elapsed, delivType, si));
+                    timerEl.textContent = left;
+                    timerEl.style.color = 'orange';
+                }
+            } else {
+                timerEl.style.color = '#bbb';
+                timerEl.textContent = i===1?'2 min':i===2?'7 min':i===3?'13 min':'—';
+            }
+        }
+
+        if (stage === 3) { clearInterval(trackingInterval); }
+    }
+
+    function closeTracking() {
+        document.getElementById('tracking-overlay').style.display = 'none';
+        if (trackingInterval) { clearInterval(trackingInterval); trackingInterval = null; }
+    }
+
+    function closeReceipt() { document.getElementById('receipt-overlay').style.display='none'; }
+    function goBack() { window.history.back(); }
+
+    loadCart();
+</script>
+
+<style>
+    /* ── TOAST ── */
+    #toast-container { position:fixed; bottom:24px; right:24px; z-index:99999; display:flex; flex-direction:column; gap:10px; }
+    .cart-toast { background:#333; color:white; padding:12px 18px; border-radius:10px; font-size:14px; font-weight:600; box-shadow:0 4px 15px rgba(0,0,0,0.2); opacity:0; transform:translateX(60px); transition:all 0.35s ease; max-width:320px; display:flex; align-items:center; gap:8px; }
+    .cart-toast.show { opacity:1; transform:translateX(0); }
+    .cart-toast-success { background:#2e7d32; }
+    .cart-toast-error   { background:#c62828; }
+    .cart-toast-info    { background:#1565c0; }
+
+    /* ── CART HEADER ── */
+    .cart-header-row { display:flex; align-items:center; justify-content:space-between; padding:0 10px; margin-bottom:4px; }
+    .cart-header-row h1 { margin:0; flex:1; text-align:center; }
+    .view-order-btn { display:flex; align-items:center; gap:6px; background:orange; color:white; border:none; padding:8px 14px; border-radius:20px; font-size:13px; font-weight:bold; cursor:pointer; transition:0.2s; white-space:nowrap; flex-shrink:0; }
+    .view-order-btn:hover { background:#e07000; }
+
+    /* ── VIEW ORDER CARDS ── */
+    .vo-order-card { background:#f9f9f9; border:1px solid #eee; border-radius:12px; padding:14px; margin-bottom:12px; }
+    .vo-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .vo-card-code { font-size:11px; font-weight:bold; color:#888; letter-spacing:0.5px; }
+    .vo-card-items { font-size:12px; color:#555; margin-bottom:8px; line-height:1.8; }
+    .vo-card-info { display:flex; flex-direction:column; gap:4px; font-size:12px; color:#666; border-top:1px solid #eee; padding-top:8px; }
+    .tracking-order-code { font-size:11px; color:#aaa; margin:4px 0 0; letter-spacing:0.5px; }
+
+    /* ── PROMO ── */
+    .promo-row { display:flex; gap:8px; margin:14px 10px 4px; }
+    .promo-row input { flex:1; padding:9px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; outline:none; }
+    .promo-row input:focus { border-color:orange; }
+    .promo-btn { padding:9px 16px; background:orange; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:14px; transition:0.2s; }
+    .promo-btn:hover { background:#e07000; }
+    #promo-msg { font-size:13px; margin:0 10px 6px; min-height:18px; }
+    .promo-success { color:#2e7d32; font-weight:600; }
+    .promo-error { color:#c62828; font-weight:600; }
+
+    /* ── PRICE BREAKDOWN ── */
+    .price-breakdown { margin:10px 10px 0; border:1px solid #eee; border-radius:10px; overflow:hidden; }
+    .breakdown-row { display:flex; justify-content:space-between; padding:8px 14px; font-size:14px; border-bottom:1px solid #f5f5f5; }
+    .breakdown-row:last-child { border-bottom:none; }
+    .total-row-main { background:#fff8f0; font-size:16px; padding:10px 14px; }
+
+    /* ── CART BUTTONS ── */
+    .cart-btns { display:flex; justify-content:center; gap:20px; margin-top:16px; padding-bottom:20px; }
+    .cart-btns .buy-button, .cart-btns .clear-cart { position:static; transform:none; width:140px; height:44px; border-radius:8px; font-size:15px; }
+
+    /* ── ITEM INSTRUCTIONS ── */
+    .item-instructions { font-size:12px; color:#888; padding:2px 0 0 4px; font-style:italic; width:100%; }
+
+    /* ── ETA SUMMARY ── */
+    .eta-summary { background:#fff8f0; border:1px solid #ffe0a0; border-radius:8px; padding:10px 14px; font-size:13px; color:#555; margin-top:12px; text-align:center; }
+
+    /* ── SAVED ADDRESS PICKER ── */
+    .saved-addr-btn { display:block; width:100%; padding:8px 12px; margin-bottom:6px; background:#f8f8f8; border:1px solid #e0e0e0; border-radius:8px; font-size:13px; text-align:left; cursor:pointer; transition:0.2s; color:#333; }
+    .saved-addr-btn:hover { background:#fff5e0; border-color:orange; }
+
+    /* ── PAYMENT SUMMARY ── */
+    .payment-summary { background:#f9f9f9; border-radius:10px; padding:10px 14px; margin-bottom:16px; }
+    .pay-summary-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; color:#555; }
+    .pay-summary-total { font-size:15px; border-top:1px solid #eee; margin-top:4px; padding-top:8px; color:#333; }
+
+    /* ── CANCEL ORDER ── */
+    /* ── VIEW ORDER ACTION BUTTONS ── */
+    .vo-track-btn {
+        display:flex; align-items:center; justify-content:center; gap:8px;
+        width:100%; margin-top:10px; padding:10px 14px;
+        background:orange; color:white;
+        font-size:14px; font-weight:bold;
+        border:none; border-radius:8px; cursor:pointer; transition:0.2s;
+        box-sizing:border-box;
+    }
+    .vo-track-btn:hover { background:#e07000; }
+    .vo-delete-btn {
+        display:flex; align-items:center; justify-content:center; gap:8px;
+        width:100%; margin-top:10px; padding:10px 14px;
+        background:#888; color:white;
+        font-size:14px; font-weight:bold;
+        border:none; border-radius:8px; cursor:pointer; transition:0.2s;
+        box-sizing:border-box;
+    }
+    .vo-delete-btn:hover { background:#c62828; }
+
+    /* ── RECEIPT INLINE BUTTON ROW ── */
+    .receipt-btn-row { display:flex; gap:8px; margin-top:16px; }
+    .receipt-track-btn, .receipt-cancel-btn, .receipt-close-btn {
+        flex:1; padding:11px 6px; font-size:13px; font-weight:bold;
+        border:none; border-radius:8px; cursor:pointer; transition:0.2s;
+        white-space:nowrap; box-sizing:border-box;
+    }
+    .receipt-track-btn { background:#333; color:white; }
+    .receipt-track-btn:hover { background:orange; }
+    .receipt-cancel-btn { background:#c62828; color:white; }
+    .receipt-cancel-btn:hover:not(.cancel-expired) { background:#b71c1c; }
+    .receipt-cancel-btn.cancel-expired { background:#bbb !important; color:#fff; cursor:not-allowed; }
+    .receipt-close-btn { background:orange; color:white; }
+    .receipt-close-btn:hover { background:red; }
+    .cancel-countdown { font-size:11px; font-weight:normal; }
+
+    /* ── OVERLAYS ── */
+    .pay-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); display:flex; justify-content:center; align-items:center; z-index:9999; }
+    .step-card { max-height:92vh; overflow-y:auto; scrollbar-width:none; } .step-card::-webkit-scrollbar { display:none; }
+    .pay-card { background:white; border-radius:14px; padding:24px; width:360px; box-shadow:0 8px 30px rgba(0,0,0,0.3); box-sizing:border-box; }
+    .step-indicator { display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+    .step { display:flex; flex-direction:column; align-items:center; font-size:13px; font-weight:bold; color:#bbb; background:#eee; border-radius:50%; width:34px; height:34px; justify-content:center; position:relative; flex-shrink:0; }
+    .step span { position:absolute; bottom:-18px; font-size:10px; white-space:nowrap; font-weight:normal; color:#aaa; }
+    .step.active { background:orange; color:white; }
+    .step.active span { color:orange; font-weight:bold; }
+    .step.done { background:#4caf50; color:white; }
+    .step.done span { color:#4caf50; }
+    .step-line { flex:1; height:2px; background:#eee; margin:0 4px; margin-bottom:18px; }
+    .active-line { background:orange; }
+    .delivery-option { display:flex; align-items:center; gap:12px; padding:13px 14px; border:2px solid #e0e0e0; border-radius:10px; cursor:pointer; margin-bottom:8px; transition:0.2s; }
+    .delivery-option:hover { background:#fff8f0; }
+    .delivery-option.selected { border-color:orange; background:#fff5e0; }
+    .delivery-icon { font-size:22px; }
+    .delivery-info { flex:1; display:flex; flex-direction:column; font-size:14px; }
+    .delivery-info strong { font-size:15px; }
+    .delivery-info span { color:#555; font-size:13px; }
+    .delivery-badge { background:#f0f0f0; border:1px solid #ccc; border-radius:20px; padding:3px 10px; font-size:13px; font-weight:bold; color:#333; }
+    .delivery-fee-tag { background:#e8f5e9; border:1px solid #a5d6a7; border-radius:20px; padding:3px 10px; font-size:13px; font-weight:bold; color:#2e7d32; }
+    .delivery-check { color:orange; font-weight:bold; font-size:18px; }
+    .delivery-check.hidden { visibility:hidden; }
+    .address-box { border:1px solid #e0e0e0; border-radius:10px; padding:14px; }
+    .address-row { display:flex; gap:12px; align-items:flex-start; margin-bottom:12px; }
+    .address-icon { font-size:22px; margin-top:4px; }
+    .address-text { flex:1; }
+    .gps-btn { width:100%; padding:10px; background:#333; color:white; border:none; border-radius:8px; font-size:14px; cursor:pointer; transition:0.2s; display:block; }
+    .gps-btn:hover { background:orange; }
+    .pay-header { display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:15px; margin-bottom:16px; color:#333; }
+    .cancel-btn { background:#ddd !important; color:#333 !important; border:none; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; width:auto !important; }
+    .cancel-btn:hover { background:#bbb !important; }
+    .pay-options { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+    .pay-option { display:flex; align-items:center; gap:12px; padding:14px; border:1px solid #e0e0e0; border-radius:8px; cursor:pointer; font-size:15px; transition:0.2s; user-select:none; }
+    .pay-option:hover { background:#f9f9f9; }
+    .pay-option.selected { background:#fff5e0; border-color:orange; }
+    .pay-option input[type="radio"] { width:17px; height:17px; accent-color:orange; pointer-events:none; }
+    .pay-fields { margin-bottom:14px; }
+    .proceed-btn { width:100%; padding:13px; background:#ccc; color:white; font-size:16px; font-weight:bold; border:none; border-radius:8px; transition:0.3s; cursor:pointer; }
+    .proceed-btn:not([disabled]):hover { filter:brightness(0.88); }
+    .qr-card { background:white; border-radius:16px; width:340px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.35); }
+    .qr-header { padding:22px 20px 18px; text-align:center; background:#1a8cff; }
+    .qr-title { font-size:30px; font-weight:900; color:white; margin-bottom:4px; }
+    .qr-scan-text { color:white; font-size:14px; font-weight:800; letter-spacing:2px; }
+    .qr-body { padding:18px 24px 10px; text-align:center; }
+    .qr-merchant { font-weight:bold; font-size:16px; color:#222; margin:0 0 12px; }
+    .qr-img { width:210px; height:210px; object-fit:contain; border-radius:6px; display:block; margin:0 auto; }
+    .qr-total { font-size:20px; font-weight:bold; color:#222; margin:12px 0 6px; }
+    .qr-instruction { font-size:12px; color:#888; margin:0 0 14px; }
+    .qr-btn-row { display:flex; gap:10px; padding:0 16px 18px; }
+    .qr-back-btn { flex:1; padding:13px; background:#e0e0e0; color:#333; font-size:15px; font-weight:bold; border:none; border-radius:10px; cursor:pointer; }
+    .qr-back-btn:hover { background:#c8c8c8; }
+    .qr-paid-btn { flex:1.5; padding:13px; background:orange; color:white; font-size:15px; font-weight:bold; border:none; border-radius:10px; cursor:pointer; }
+    .qr-paid-btn:hover { background:#cc7000; }
+    .receipt-card { background:white; border-radius:14px; padding:24px 40px; width:540px; max-height:92vh; overflow-y:auto; box-shadow:0 8px 30px rgba(0,0,0,0.3); text-align:center; box-sizing:border-box; }
+    .receipt-header .receipt-logo { width:65px; margin-bottom:6px; }
+    .receipt-header h2 { color:red; margin:0; font-size:20px; }
+    .receipt-sub { color:#888; font-size:13px; margin:2px 0 10px; }
+    .receipt-item { display:flex; justify-content:space-between; padding:6px 0; font-size:14px; text-align:left; }
+    .total-row { font-size:16px; padding:8px 0; }
+    .tx-row { font-size:12px; color:#888; padding:4px 0 8px; }
+    .tx-code { font-family:monospace; font-size:12px; color:orange; font-weight:bold; letter-spacing:1px; }
+    .receipt-info { font-size:13px; text-align:left; margin:5px 0; color:#444; }
+    .receipt-thank { font-size:15px; font-weight:bold; color:orange; margin:14px 0 10px; }
+
+    hr { border:none; border-top:1px dashed #ccc; margin:10px 0; }
+
+    /* ── TRACKING CARD — no scroll, compact to fit viewport ── */
+    .tracking-card {
+        background:white; border-radius:20px; width:380px;
+        /* no overflow-y:auto — everything fits in one view */
+        overflow:hidden;
+        box-shadow:0 8px 30px rgba(0,0,0,0.3);
+        box-sizing:border-box;
+        scrollbar-width:none;
+    }
+    .tracking-card::-webkit-scrollbar { display:none; }
+    .tracking-top { padding:14px 24px 0; text-align:center; }
+    .tracking-title { font-size:15px; font-weight:900; color:#111; letter-spacing:1.5px; }
+    .tracking-eta { text-align:center; padding:6px 24px 0; }
+    .eta-label { font-size:12px; color:#888; margin:0 0 2px; }
+    .eta-time { font-size:28px; font-weight:900; color:#111; margin:0; }
+    .tracking-illustration { display:flex; justify-content:center; align-items:center; margin:10px 24px 0; border-radius:16px; height:90px; background:#fff0f5; }
+    .track-icon { font-size:54px; animation:iconBounce 1.6s ease-in-out infinite; display:inline-block; }
+    @keyframes iconBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .track-progress { display:flex; gap:6px; padding:10px 24px 0; align-items:flex-end; }
+    .track-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .track-bar { width:100%; height:6px; background:#e0e0e0; border-radius:10px; overflow:hidden; position:relative; }
+    .track-bar.bar-done { background:orange; }
+    .track-bar.bar-active::after { content:''; position:absolute; top:0; left:-60%; width:60%; height:100%; background:orange; border-radius:10px; animation:barSlide 1.2s ease-in-out infinite; }
+    @keyframes barSlide { 0%{left:-60%} 100%{left:140%} }
+    .bar-label { font-size:9px; color:#aaa; text-align:center; white-space:nowrap; }
+    .bar-timer { font-size:10px; font-weight:bold; color:#bbb; text-align:center; white-space:nowrap; }
+    .track-status-text { font-size:13px; color:#333; text-align:center; padding:8px 24px 0; margin:0; font-weight:500; line-height:1.5; }
+    .track-address-box { margin:8px 24px 0; border:1px solid #eee; border-radius:12px; padding:8px 14px; background:#fafafa; }
+    .track-address-title { font-size:12px; font-weight:bold; color:#333; margin-bottom:4px; }
+    .track-address-text { font-size:12px; color:#555; margin:0; }
+    .track-note-text { font-size:11px; color:#888; margin:3px 0 0; }
+    .close-track-btn { display:block; width:calc(100% - 48px); margin:10px 24px 14px; padding:11px; background:orange; color:white; font-size:15px; font-weight:bold; border:none; border-radius:10px; cursor:pointer; box-sizing:border-box; }
+    .close-track-btn:hover { background:red; }
+</style>
+</body>
+</html>
