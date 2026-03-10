@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>The Drip Bite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="sign.css">
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+    <style>
+        /* ── INLINE TOAST (no external deps needed on login page) ── */
+        #auth-toast-container {
+            position: fixed; bottom: 24px; right: 24px; z-index: 99999;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .auth-toast {
+            padding: 13px 20px; border-radius: 10px; font-size: 14px;
+            font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            color: white; opacity: 0; transform: translateX(60px);
+            transition: all 0.35s ease; max-width: 320px; font-family: Arial, sans-serif;
+        }
+        .auth-toast.show { opacity: 1; transform: translateX(0); }
+        .auth-toast.success { background: #2e7d32; }
+        .auth-toast.error   { background: #c62828; }
+        .auth-toast.info    { background: #1565c0; }
+
+
+    </style>
+</head>
+<body>
+    <div id="auth-toast-container"></div>
+
+    <div class="container" id="container">
+        <!-- LOGIN FORM -->
+        <div class="form-container sign-in">
+            <form id="login-form">
+                <h1>Login</h1>
+                <input type="text" placeholder="Username" required id="username">
+                <input type="password" placeholder="Password" required id="password">
+                <a href="#" onclick="showForgotPassword(); return false;">Forgot password?</a>
+                <button id="login-btn">Login</button>
+
+            </form>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div class="form-container sign-up">
+            <form id="signup-form">
+                <h1>Registration</h1>
+                <input type="text" placeholder="Username" required id="signup-username">
+                <input type="email" placeholder="Email" required id="email">
+                <!-- #1 FIX: Added phone number field -->
+                <input type="tel" placeholder="Phone Number (e.g. 09xxxxxxxxx)" id="phone" pattern="[0-9]{10,11}">
+                <input type="password" placeholder="Password" required id="signup-password">
+                <button id="register-btn">Register</button>
+
+            </form>
+        </div>
+
+        <div class="toggle-container" id="toggle-container">
+            <img class="logo" src="assets/LOGO.png" alt="">
+            <h1 id="toggle-title">Hello, Welcome To The Drip Bite!</h1>
+            <p id="toggle-text">Don't have an account?</p>
+            <button class="toggle-button" id="register">Register</button>
+        </div>
+    </div>
+
+    <!-- FORGOT PASSWORD OVERLAY (#2 FIX: uses email instead of username) -->
+    <div id="forgot-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:16px; padding:30px 28px; width:340px; box-shadow:0 8px 30px rgba(0,0,0,0.25); box-sizing:border-box; position:relative;">
+            <button onclick="hideForgotPassword()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;width:auto;padding:4px;">✕</button>
+            <h2 style="margin:0 0 6px; font-size:18px; color:#333;">Reset Password</h2>
+            <p style="font-size:13px; color:#777; margin:0 0 14px;">Enter the email linked to your account.</p>
+            <input type="email" id="reset-email" placeholder="Your Email" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:10px;">
+            <input type="password" id="reset-newpw" placeholder="New Password" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:10px;">
+            <input type="password" id="reset-confirmpw" placeholder="Confirm New Password" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:4px;">
+            <p id="reset-msg" style="font-size:13px; min-height:18px; margin:0 0 12px;"></p>
+            <button onclick="submitForgotPassword()" style="width:100%;padding:11px;background:orange;color:white;font-size:15px;font-weight:bold;border:none;border-radius:8px;cursor:pointer;">Reset Password</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // ── TOAST ──────────────────────────────────────────────────
+        function showAuthToast(msg, type) {
+            type = type || 'success';
+            var c = document.getElementById('auth-toast-container');
+            var el = document.createElement('div');
+            el.className = 'auth-toast ' + type;
+            el.textContent = msg;
+            c.appendChild(el);
+            setTimeout(function(){ el.classList.add('show'); }, 10);
+            setTimeout(function(){ el.classList.remove('show'); setTimeout(function(){ el.remove(); }, 400); }, 3200);
+        }
+
+        function showForgotPassword() {
+            document.getElementById('reset-email').value = '';
+            document.getElementById('reset-newpw').value = '';
+            document.getElementById('reset-confirmpw').value = '';
+            document.getElementById('reset-msg').textContent = '';
+            document.getElementById('forgot-overlay').style.display = 'flex';
+        }
+
+        function hideForgotPassword() {
+            document.getElementById('forgot-overlay').style.display = 'none';
+        }
+
+        // #2 FIX: Find account by email, not username
+        function submitForgotPassword() {
+            var email = document.getElementById('reset-email').value.trim().toLowerCase();
+            var newPw = document.getElementById('reset-newpw').value;
+            var confirmPw = document.getElementById('reset-confirmpw').value;
+            var msg = document.getElementById('reset-msg');
+
+            if (!email) { msg.style.color = 'red'; msg.textContent = 'Please enter your email.'; return; }
+            if (newPw.length < 6) { msg.style.color = 'red'; msg.textContent = 'Password must be at least 6 characters.'; return; }
+            if (newPw !== confirmPw) { msg.style.color = 'red'; msg.textContent = 'Passwords do not match.'; return; }
+
+            // Search localStorage for a user with matching email
+            var foundKey = null, foundUser = null;
+            for (var i = 0; i < localStorage.length; i++) {
+                var key = localStorage.key(i);
+                if (key === 'user' || key === 'cart' || key.startsWith('dripbite')) continue;
+                try {
+                    var u = JSON.parse(localStorage.getItem(key));
+                    if (u && u.email && u.email.toLowerCase() === email) { foundKey = key; foundUser = u; break; }
+                } catch(e) {}
+            }
+
+            if (!foundUser) { msg.style.color = 'red'; msg.textContent = 'No account found with that email.'; return; }
+
+            foundUser.password = newPw;
+            localStorage.setItem(foundKey, JSON.stringify(foundUser));
+            var activeUser = JSON.parse(localStorage.getItem('user') || '{}');
+            if (activeUser.username === foundKey) localStorage.setItem('user', JSON.stringify(foundUser));
+
+            msg.style.color = 'green';
+            msg.textContent = 'Password reset! You can now log in.';
+            setTimeout(hideForgotPassword, 1800);
+        }
+    </script>
+</body>
+</html>
